@@ -614,24 +614,12 @@ function New-PRTGSNMPTrafficSensor
 
         [Parameter(ValueFromPipelineByPropertyName = $true)]
         [string[]]
-        $Tags = @('PRTGFn v1.0', 'snmptrafficsensor', 'bandwidthsensor'),
+        $Tags = @('PRTGFn_v1.0', 'snmptrafficsensor', 'bandwidthsensor'),
 
         [Parameter(ValueFromPipelineByPropertyName = $true)]
         [ValidateRange(1,5)]
         [int]
         $Priority = 3,
-
-        [Parameter(ValueFromPipelineByPropertyName = $true)]
-        [string]
-        $NameChannelIn = 'Traffic In',
-
-        [Parameter(ValueFromPipelineByPropertyName = $true)]
-        [string]
-        $NameChannelOut = 'Traffic Out',
-
-        [Parameter(ValueFromPipelineByPropertyName = $true)]
-        [string]
-        $NameChannelTotal = 'Traffic Total',
 
         [Parameter(ValueFromPipelineByPropertyName = $true)]
         [string[]]
@@ -646,9 +634,6 @@ function New-PRTGSNMPTrafficSensor
         $otherParameters += "id=$ParentId"
         $otherParameters += "priority_=$Priority"
         $otherParameters += "tags_=$($Tags -join ' ')"
-        $otherParameters += "namein_=$NameChannelIn"
-        $otherParameters += "nameout_=$NameChannelOut"
-        $otherParameters += "namesum_=$NameChannelTotal"
         $otherParameters += "sensortype=snmptraffic"
         $otherParameters += "interfacenumber_=1"
 
