@@ -1,5 +1,7 @@
 
-add-type @"
+$Version = "v1.0"
+
+Add-Type @"
     using System.Net;
     using System.Security.Cryptography.X509Certificates;
     public class TrustAllCertsPolicy : ICertificatePolicy {
@@ -589,7 +591,7 @@ function New-PRTGSNMPTrafficSensor
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [string]
         $Interface,
 
@@ -614,7 +616,7 @@ function New-PRTGSNMPTrafficSensor
 
         [Parameter(ValueFromPipelineByPropertyName = $true)]
         [string[]]
-        $Tags = @('PRTGFn_v1.0', 'snmptrafficsensor', 'bandwidthsensor'),
+        $Tags = @("PRTGFn_$Version", 'snmptrafficsensor', 'bandwidthsensor'),
 
         [Parameter(ValueFromPipelineByPropertyName = $true)]
         [ValidateRange(1,5)]
@@ -641,6 +643,48 @@ function New-PRTGSNMPTrafficSensor
         {
             $otherParameters += "trafficmode_=$mode"
         }
+
+        $result = (Invoke-PRTGCommand -CommandPath addsensor5.htm -OtherParameters $otherParameters).Content
+
+        [regex]::Match($result, "<title>.*</title>", "IgnoreCase").Value -notmatch "System Error"
+    }
+}
+
+function New-PRTGSNMPDiskFreeSensor
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [string]
+        $Disk,
+
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
+        $ParentId,
+
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [int]
+        $Index,
+
+        [Parameter(ValueFromPipelineByPropertyName = $true)]
+        [string[]]
+        $Tags = @("PRTGFn_$Version", 'snmpdiskfreesensor', 'diskspacesensor', 'diskfree', 'snmp'),
+
+        [Parameter(ValueFromPipelineByPropertyName = $true)]
+        [ValidateRange(1,5)]
+        [int]
+        $Priority = 3
+    )
+    Process
+    {
+        $otherParameters = @()
+
+        $otherParameters += "disk__check=$Index|$Disk|Fixed Disk|"
+        $otherParameters += "id=$ParentId"
+        $otherParameters += "priority_=$Priority"
+        $otherParameters += "tags_=$($Tags -join ' ')"
+        $otherParameters += "sensortype=snmpdiskfree"
+        $otherParameters += "disk_=1"
 
         $result = (Invoke-PRTGCommand -CommandPath addsensor5.htm -OtherParameters $otherParameters).Content
 
