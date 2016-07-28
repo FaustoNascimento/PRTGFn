@@ -225,7 +225,7 @@ function Get-PRTGSensor
             $PSBoundParameters.Add('OtherParameters', $otherParameters)
         }
 
-        $Sensors = ([xml] (Invoke-PRTGCommand -Content sensors @PSBoundParameters).Content).Sensors
+        $Sensors = ([xml] (Get-PRTGTable -Content sensors @PSBoundParameters).Content).Sensors
         
         if ($Sensors.TotalCount -gt 0)
         {
@@ -326,7 +326,7 @@ function Get-PRTGDevice
             $PSBoundParameters.Add('OtherParameters', $otherParameters)
         }
 
-        $Devices = ([xml] (Invoke-PRTGCommand -Content devices @PSBoundParameters).Content).Devices
+        $Devices = ([xml] (Get-PRTGTable -Content devices @PSBoundParameters).Content).Devices
 
         if ($Devices.TotalCount -gt 0)
         {
@@ -399,7 +399,7 @@ function Get-PRTGGroup
         $otherParameters += "filter_type=group"
         $PSBoundParameters.Add('OtherParameters', $otherParameters)
         
-        $Groups = ([xml] (Invoke-PRTGCommand -Content groups @PSBoundParameters).Content).Groups
+        $Groups = ([xml] (Get-PRTGTable -Content groups @PSBoundParameters).Content).Groups
 
         if ($Groups.TotalCount -gt 0)
         {
@@ -428,7 +428,7 @@ function Set-PRTGObjectProperty
     )
     Process
     {
-        [void] (Invoke-PRTGCommand -CommandPath api/setobjectproperty.htm -Id $Id -OtherParameters "name=$PropertyName&value=$Value")
+        [void] (Invoke-PRTGCommand -CommandPath api/setobjectproperty.htm -Id $Id -Parameters "name=$PropertyName", "value=$Value")
     }
 }
 
@@ -449,7 +449,7 @@ function Get-PRTGObjectProperty
 
     Process
     {
-        ([xml] (Invoke-PRTGCommand -CommandPath api/getobjectproperty.htm -Id $Id -OtherParameters "name=$PropertyName").Content).PRTG.Result
+        ([xml] (Invoke-PRTGCommand -CommandPath api/getobjectproperty.htm -Id $Id -Parameters "name=$PropertyName").Content).PRTG.Result
     }
 }
 
@@ -466,7 +466,7 @@ function Suspend-PRTGObject
 
     Process
     {
-        [void] (Invoke-PRTGCommand -CommandPath "api/pause.htm" -Id $Id -OtherParameters action=0)
+        [void] (Invoke-PRTGCommand -CommandPath "api/pause.htm" -Id $Id -Parameters action=0)
     }
 }
 
@@ -483,19 +483,30 @@ function Resume-PRTGObject
 
     Process
     {
-        [void] (Invoke-PRTGCommand -CommandPath "api/pause.htm" -Id $Id -OtherParameters action=1)
+        [void] (Invoke-PRTGCommand -CommandPath "api/pause.htm" -Id $Id -Parameters action=1)
+        
+        # This is invoked twice when doing through the GUI with a 2 second interval
+        # It seems to speed things up as far as the console is concerned, so we're doing the same
+        Start-PRTGScan -Id $Id
+        Start-Sleep -Seconds 2
+        Start-PRTGScan -Id $Id
+    }
+}
 
-        if (Get-PRTGDevice -Id $Id -Columns objid) # if this object is a device already, check for sensors under it to enable
-        {
-            Get-PRTGSensor -ParentId $Id -Columns objid, message | Where-Object message_raw -eq 'Paused by parent' | Resume-PRTGObject
-        }
-        else # otherwise, device might still be a group or a sensor. If it's a group, we cycle through all child objects
-        {
-            foreach ($device in (Get-PRTGDevice -ParentId $Id -Columns objid))
-            {
-                Get-PRTGSensor -ParentId $device.objid -Columns objid, message | Where-Object message_raw -eq 'Paused by parent' | Resume-PRTGObject
-            }
-        }
+function Start-PRTGScan
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory=$True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
+        [Alias('objid')]
+        [int]
+        $Id
+    )
+    
+    Process
+    {
+        [void] (Invoke-PRTGCommand -CommandPath "api/pause.htm" -Id $Id -Parameters action=1)
     }
 }
 
@@ -512,7 +523,7 @@ function Get-PRTGPasswordHash
     {
         try
         {
-            $result = Invoke-PRTGCommand -Protocol $Script:Protocol -Server $Script:Server -Port $Script:Port -CommandPath 'api/getpasshash.htm' -Username $Credential.UserName -Password $Credential.GetNetworkCredential().Password
+            $result = Invoke-PRTGCommand -CommandPath 'api/getpasshash.htm' -Username $Credential.UserName -Password $Credential.GetNetworkCredential().Password
             $result.Content
         }
         catch
@@ -574,7 +585,7 @@ function Copy-PRTGObject
         
         try 
         {
-            $result = Invoke-PRTGCommand -CommandPath api/duplicateobject.htm -Id $DeviceToCloneId -OtherParameters $otherParameters
+            $result = Invoke-PRTGCommand -CommandPath api/duplicateobject.htm -Id $DeviceToCloneId -Parameters $otherParameters
             
             # The result is the ID of the new object
             ($result.BaseResponse.responseuri.ToString() -split "ID=")[1].Split('&')[0]
@@ -596,6 +607,8 @@ function New-PRTGSNMPTrafficSensor
         $Interface,
 
         [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
+        [Alias('Id')]
+        [Int]
         $ParentId,
 
         [Parameter(ValueFromPipelineByPropertyName = $true)]
@@ -630,21 +643,21 @@ function New-PRTGSNMPTrafficSensor
     )
     Process
     {
-        $otherParameters = @()
+        $parameters = @()
 
-        $otherParameters += "interfacenumber__check=$Interface|$Name|||$Comments|$([int][bool]$Is64Bit)||$LineSpeed"
-        $otherParameters += "id=$ParentId"
-        $otherParameters += "priority_=$Priority"
-        $otherParameters += "tags_=$($Tags -join ' ')"
-        $otherParameters += "sensortype=snmptraffic"
-        $otherParameters += "interfacenumber_=1"
+        $parameters += "interfacenumber__check=$Interface|$Name|||$Comments|$([int][bool]$Is64Bit)||$LineSpeed"
+        $parameters += "id=$ParentId"
+        $parameters += "priority_=$Priority"
+        $parameters += "tags_=$($Tags -join ' ')"
+        $parameters += "sensortype=snmptraffic"
+        $parameters += "interfacenumber_=1"
 
         foreach ($mode in $TrafficMode)
         {
-            $otherParameters += "trafficmode_=$mode"
+            $parameters += "trafficmode_=$mode"
         }
 
-        $result = (Invoke-PRTGCommand -CommandPath addsensor5.htm -OtherParameters $otherParameters).Content
+        $result = (Invoke-PRTGCommand -CommandPath addsensor5.htm -Parameters $parameters).Content
 
         [regex]::Match($result, "<title>.*</title>", "IgnoreCase").Value -notmatch "System Error"
     }
@@ -660,6 +673,8 @@ function New-PRTGSNMPDiskFreeSensor
         $Disk,
 
         [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
+        [Alias('Id')]
+        [Int]
         $ParentId,
 
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
@@ -677,43 +692,77 @@ function New-PRTGSNMPDiskFreeSensor
     )
     Process
     {
-        $otherParameters = @()
+        $parameters = @()
 
-        $otherParameters += "disk__check=$Index|$Disk|Fixed Disk|"
-        $otherParameters += "id=$ParentId"
-        $otherParameters += "priority_=$Priority"
-        $otherParameters += "tags_=$($Tags -join ' ')"
-        $otherParameters += "sensortype=snmpdiskfree"
-        $otherParameters += "disk_=1"
+        $parameters += "disk__check=$Index|$Disk|Fixed Disk|"
+        $parameters += "id=$ParentId"
+        $parameters += "priority_=$Priority"
+        $parameters += "tags_=$($Tags -join ' ')"
+        $parameters += "sensortype=snmpdiskfree"
+        $parameters += "disk_=1"
 
-        $result = (Invoke-PRTGCommand -CommandPath addsensor5.htm -OtherParameters $otherParameters).Content
+        $result = (Invoke-PRTGCommand -CommandPath addsensor5.htm -Parameters $parameters).Content
 
         [regex]::Match($result, "<title>.*</title>", "IgnoreCase").Value -notmatch "System Error"
     }
 }
 
-function Invoke-PRTGCommand
+# NOT COMPLETE
+# Examining the XML shows that some properties are missing from the object (passwords are in clear text)
+function New-PRTGDevice
 {
-    [CmdletBinding(DefaultParameterSetName = 'All')]
+    [CmdletBinding()]
     param
     (
-        [Parameter()]
-        [ValidateSet('HTTP', 'HTTPS')]
-        [string]
-        $Protocol = $Script:Protocol,
-
-        [Parameter()]
-        [string]
-        $Server = $Script:Server,
-
-        [Parameter()]
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
+        [Alias('Id')]
         [int]
-        $Port = $Script:Port,
+        $ParentId,
 
-        [Parameter()]
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [string]
-        $CommandPath = 'api/table.xml',
+        $DeviceName,
 
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [string]
+        $Hostname,
+
+        [Parameter(ValueFromPipelineByPropertyName = $true)]
+        [string]
+        $DeviceIcon,
+
+        [Parameter(ValueFromPipelineByPropertyName = $true)]
+        [ValidateSet('IPv4', 'IPv6')]
+        [string]
+        $IPVersion = 'IPv4',
+
+        [Parameter(ValueFromPipelineByPropertyName = $true)]
+        [string[]]
+        $Tags
+    )
+
+    Process
+    {
+	    $parameters = @()
+
+        $parameters += "name_=$DeviceName"
+        $parameters += "id=$ParentId"
+        $parameters += "ipversion_=$([int] ($IPVersion -eq 'IPv6'))"
+        $parameters += "tags_=$($Tags -join ' ')"
+        $parameters += "host$([regex]::Match($IPVersion, 'v6').Value)_=$Hostname"
+        $parameters += "deviceicon_=$DeviceIcon"
+
+        $result = (Invoke-PRTGCommand -CommandPath adddevice2.htm -Parameters $parameters).Content
+
+        [regex]::Match($result, "<title>.*</title>", "IgnoreCase").Value -notmatch "System Error"
+    }
+}
+
+function Get-PRTGTable
+{
+    [CmdletBinding()]
+    param
+    (
         [Parameter()]
         [ValidateSet('sensortree', 'devices', 'sensors', 'tickets', 'ticketdata', 'messages', 'values', 'channels', 'reports', 'storedreports', 'toplists', 'groups')]
         [string]
@@ -743,6 +792,72 @@ function Invoke-PRTGCommand
         $OutputFormat,
 
         [Parameter()]
+        [string[]]
+        $OtherParameters
+    )
+    Process
+    {
+        if ($Content)
+        {
+            $OtherParameters += "content=$Content"
+        }
+
+        if ($Columns)
+        {
+            $OtherParameters += "columns=$($Columns -join ',')"
+        }
+
+        if ($Id)
+        {
+            $OtherParameters += "id=$Id"
+        }
+
+        if ($Count)
+        {
+            $OtherParameters += "count=$Count"
+        }
+
+        if ($Start)
+        {
+            $OtherParameters += "start=$Start"
+        }
+
+        if ($OutputFormat)
+        {
+            $OtherParameters += "output=$OutputFormat"
+        }
+
+        Invoke-PRTGCommand -CommandPath api/table.htm -Parameters $OtherParameters
+    }
+}
+
+function Invoke-PRTGCommand
+{
+    [CmdletBinding(DefaultParameterSetName = 'All')]
+    param
+    (
+        [Parameter()]
+        [ValidateSet('HTTP', 'HTTPS')]
+        [string]
+        $Protocol = $Script:Protocol,
+
+        [Parameter()]
+        [string]
+        $Server = $Script:Server,
+
+        [Parameter()]
+        [int]
+        $Port = $Script:Port,
+
+        [Parameter()]
+        [string]
+        $CommandPath,
+
+        [Parameter()]
+        [int]
+        $Id,
+
+        [Parameter()]
         [string]
         $Username = $Script:Username,
 
@@ -756,7 +871,11 @@ function Invoke-PRTGCommand
 
         [Parameter()]
         [string[]]
-        $OtherParameters
+        $Parameters,
+
+        [Parameter()]
+        [int]
+        $MaximumRedirection = 5
     )
     Process
     {
@@ -773,35 +892,10 @@ function Invoke-PRTGCommand
         }
 
         $urlString = "$($Protocol)://$($Server):$Port/$($CommandPath)?"
-        
-        if ($Content)
-        {
-            $urlString += "content=$Content&"
-        }
-
-        if ($Columns)
-        {
-            $urlString += "columns=$Columns&".Replace(' ', ',')
-        }
 
         if ($Id)
         {
             $urlString += "id=$Id&"
-        }
-
-        if ($Count)
-        {
-            $urlString += "count=$Count&"
-        }
-
-        if ($Start)
-        {
-            $urlString += "start=$Start&"
-        }
-
-        if ($OutputFormat)
-        {
-            $urlString += "output=$OutputFormat&"
         }
 
         if ($Username)
@@ -814,14 +908,15 @@ function Invoke-PRTGCommand
             $urlString += "password=$([System.Net.WebUtility]::UrlEncode($Password))&"
         }
         
+        # Since we're assigning the PasswordHash a default value we need to check it this way
         if ($PasswordHash -and -not $Password)
         {
             $urlString += "passhash=$PasswordHash&"
         }
 
-        if ($OtherParameters)
+        if ($Parameters)
         {
-            $urlString += $OtherParameters -join '&'
+            $urlString += $Parameters -join '&'
         }
 
         if ($urlString.EndsWith('&'))
@@ -832,7 +927,7 @@ function Invoke-PRTGCommand
         try
         {
             Write-Debug $urlString
-            Invoke-WebRequest -Uri $urlString -UseBasicParsing
+            Invoke-WebRequest -Uri $urlString -UseBasicParsing -MaximumRedirection $MaximumRedirection
         }
         catch
         {
