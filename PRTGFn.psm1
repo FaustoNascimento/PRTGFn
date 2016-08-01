@@ -1066,6 +1066,49 @@ function New-PRTGDevice
     }
 }
 
+function Get-PRTGSNMPSensorValues
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+        [Alias('Id')]
+        [int]
+        $DeviceId,
+
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [ValidateSet('snmpmemory', 'snmptraffic', 'snmpdiskfree')]        
+        [string]
+        $SensorType
+    )
+
+    Process
+    {
+        $result = Invoke-PRTGCommand -CommandPath controls/addsensor2.htm -Id $DeviceId -Parameters "sensortype=$SensorType" -DoNotUseBasicParsing
+        
+        $tmpid = (($result.BaseResponse.ResponseUri.ToString() -split 'tmpid=')[1] -split '&')[0]
+        
+        do 
+        {
+            $progress = ((Invoke-PRTGCommand -CommandPath api/getaddsensorprogress.htm -Id $DeviceId -Parameters "tmpid=$tmpid").Content | ConvertFrom-Json).Progress
+            Start-Sleep -Milliseconds 500
+        } until ($progress -eq 100)
+        
+
+        $result = (Invoke-PRTGCommand -CommandPath addsensor4.htm -Id $DeviceId -Parameters "tmpid=$tmpid" -DoNotUseBasicParsing)
+        $parsedHtml = $result.ParsedHtml.
+        
+        $values = switch ($SensorType)
+        {
+            'snmpmemory' {$parsedHtml.getElementsByName('memory__check')}
+            'snmptraffic' {$parsedHtml.getElementsByName('interfacenumber__check')}
+            'snmpdiskfree' {$parsedHtml.getElementsByName('disk__check')}
+        }
+
+        $values | ForEach-Object {$_.Value}
+    }
+}
+
 function Get-PRTGTable
 {
     [CmdletBinding()]
@@ -1198,7 +1241,7 @@ function Invoke-PRTGCommand
         try
         {
             Write-Debug $urlString
-            Invoke-WebRequest -Uri $urlString -MaximumRedirection $MaximumRedirection -UseBasicParsing:$UseBasicParsing -ErrorAction Stop -WebSession $Script:Session
+            Invoke-WebRequest -Uri $urlString -MaximumRedirection $MaximumRedirection -UseBasicParsing:(-not $DoNotUseBasicParsing) -ErrorAction Stop -WebSession $Script:Session
         }
         catch
         {
