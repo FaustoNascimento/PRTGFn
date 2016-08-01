@@ -48,15 +48,15 @@ function Connect-PRTG
         [string]
         $Protocol = 'HTTPS',
 
-        [Parameter(Mandatory = $true, Position = 3, ParameterSetName = 'Credential')]
+        [Parameter(Mandatory, Position = 3, ParameterSetName = 'Credential')]
         [PSCredential]
         $Credential,
 
-        [Parameter(Mandatory = $true, Position = 3, ParameterSetName = 'PasswordHash')]
+        [Parameter(Mandatory, Position = 3, ParameterSetName = 'PasswordHash')]
         [string]
         $Username,
 
-        [Parameter(Mandatory = $true, Position = 4, ParameterSetName = 'PasswordHash')]
+        [Parameter(Mandatory, Position = 4, ParameterSetName = 'PasswordHash')]
         [string]
         $PasswordHash
     )
@@ -76,11 +76,27 @@ function Connect-PRTG
                 }
             }
             
+            # Test Login
+            if ($Username)
+            {
+                $url = "$($Protocol)://$($Server):$Port/api/public/testlogin.htm?username=$Username&passhash=$PasswordHash"
+            }
+            else 
+            {
+                $url = "$($Protocol)://$($Server):$Port/api/public/testlogin.htm?username=$($Credential.Username)&password=$($Credential.GetNetworkCredential().Password)"
+            }
+
+	        $result = Invoke-WebRequest -Uri $url -SessionVariable session -UseBasicParsing
+            
+            if ($result.Content -ne 'OK')
+            {
+                $PSCmdlet.ThrowTerminatingError((New-ErrorRecord "Failed to connect to PRTG"))
+            }
+
             $Script:Protocol = $Protocol
             $Script:Server = $Server
             $Script:Port = $Port
-            $Script:Username = if ($Username) {$Username} else {$Credential.UserName}
-            $Script:PasswordHash = if ($PasswordHash) {$PasswordHash} else {Get-PRTGPasswordHash -Credential $Credential}
+            $Script:Session = $session           
         }
         catch 
         {
@@ -378,6 +394,12 @@ function Get-PRTGGroup
 
         $otherParameters = @()
         
+	    if ($Id)
+        {
+            $otherParameters += "filter_objid=$Id"
+            [void] $PSBoundParameters.Remove('id')
+        }
+        
         if ($Name)
         {
             $otherParameters += "filter_name=$Name"
@@ -413,16 +435,16 @@ function Set-PRTGObjectProperty
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
         [Alias('objid')]
         [int]
         $Id,
 
-        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         [string]
         $PropertyName,
 
-        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         [string]
         $Value
     )
@@ -437,12 +459,12 @@ function Get-PRTGObjectProperty
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
         [Alias('objid')]
         [int]
         $Id,
 
-        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         [string]
         $PropertyName
     )
@@ -458,7 +480,7 @@ function Suspend-PRTGObject
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory=$True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
         [Alias('objid')]
         [int]
         $Id
@@ -475,7 +497,7 @@ function Resume-PRTGObject
     [CmdletBinding()]
     param 
     (
-        [Parameter(Mandatory=$True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
         [Alias('objid')]
         [int]
         $Id
@@ -498,7 +520,7 @@ function Start-PRTGScan
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory=$True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
         [Alias('objid')]
         [int]
         $Id
@@ -506,30 +528,7 @@ function Start-PRTGScan
     
     Process
     {
-        [void] (Invoke-PRTGCommand -CommandPath "api/pause.htm" -Id $Id -Parameters action=1)
-    }
-}
-
-function Get-PRTGPasswordHash
-{
-    [CmdletBinding()]
-    param
-    (
-        [Parameter(Mandatory = $true, Position = 0)]
-        [PSCredential]
-        $Credential
-    )
-    Process
-    {
-        try
-        {
-            $result = Invoke-PRTGCommand -CommandPath 'api/getpasshash.htm' -Username $Credential.UserName -Password $Credential.GetNetworkCredential().Password
-            $result.Content
-        }
-        catch
-        {
-            $PSCmdlet.ThrowTerminatingError((New-ErrorRecord $_.Exception))
-        }
+        [void] (Invoke-PRTGCommand -CommandPath "api/scannow.htm" -Id $Id)
     }
 }
 
@@ -538,38 +537,38 @@ function Copy-PRTGObject
     [CmdletBinding(DefaultParameterSetName = 'Device')]
     param
     (
-        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, ParameterSetName = 'Device')]
-        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, ParameterSetName = 'Sensor')]
-        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, ParameterSetName = 'Group')]
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName, ParameterSetName = 'Device')]
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName, ParameterSetName = 'Sensor')]
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName, ParameterSetName = 'Group')]
         [Alias('objid')]
         [int]
         $DeviceToCloneId,
 
-        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true, ParameterSetName = 'Device')]
-        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true, ParameterSetName = 'Sensor')]
-        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true, ParameterSetName = 'Group')]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ParameterSetName = 'Device')]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ParameterSetName = 'Sensor')]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ParameterSetName = 'Group')]
         [string]
         $DisplayName,
 
-        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true, ParameterSetName = 'Device')]
-        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true, ParameterSetName = 'Sensor')]
-        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true, ParameterSetName = 'Group')]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ParameterSetName = 'Device')]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ParameterSetName = 'Sensor')]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ParameterSetName = 'Group')]
         [string]
         $ParentGroupId,
 
-        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true, ParameterSetName = 'Device')]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ParameterSetName = 'Device')]
         [string]
         $Hostname,
 
-        [Parameter(ValueFromPipelineByPropertyName = $true, ParameterSetName = 'Device')]
+        [Parameter(ValueFromPipelineByPropertyName, ParameterSetName = 'Device')]
         [switch]
         $Device,
 
-        [Parameter(ValueFromPipelineByPropertyName = $true, ParameterSetName = 'Sensor')]
+        [Parameter(ValueFromPipelineByPropertyName, ParameterSetName = 'Sensor')]
         [switch]
         $Sensor,
 
-        [Parameter(ValueFromPipelineByPropertyName = $true, ParameterSetName = 'Group')]
+        [Parameter(ValueFromPipelineByPropertyName, ParameterSetName = 'Group')]
         [switch]
         $Group
     )
@@ -602,64 +601,62 @@ function New-PRTGSNMPTrafficSensor
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         [string]
         $Interface,
 
-        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
         [Alias('Id')]
         [Int]
         $ParentId,
 
-        [Parameter(ValueFromPipelineByPropertyName = $true)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [string]
         $Name = $Interface,
 
-        [Parameter(ValueFromPipelineByPropertyName = $true)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [string]
         $Comments = $Interface,
 
-        [Parameter(ValueFromPipelineByPropertyName = $true)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [Switch]
         $Is64Bit = $false,
 
-        [Parameter(ValueFromPipelineByPropertyName = $true)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [int64]
         $LineSpeed = 0,
 
-        [Parameter(ValueFromPipelineByPropertyName = $true)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [string[]]
         $Tags = @("PRTGFn_$Version", 'snmptrafficsensor', 'bandwidthsensor'),
 
-        [Parameter(ValueFromPipelineByPropertyName = $true)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateRange(1,5)]
         [int]
         $Priority = 3,
 
-        [Parameter(ValueFromPipelineByPropertyName = $true)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [string[]]
         [ValidateSet('errors', 'discards', 'unicast', 'nonunicast', 'multicast', 'broadcast', 'unknown')]
-        $TrafficMode
+        $TrafficMode,
+
+	    [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
+        [int]
+        $RefreshInterval = 0
     )
     Process
     {
         $parameters = @()
-
-        $parameters += "interfacenumber__check=$Interface|$Name|||$Comments|$([int][bool]$Is64Bit)||$LineSpeed"
-        $parameters += "id=$ParentId"
-        $parameters += "priority_=$Priority"
-        $parameters += "tags_=$($Tags -join ' ')"
-        $parameters += "sensortype=snmptraffic"
         $parameters += "interfacenumber_=1"
+        $parameters += "interfacenumber__check=$Interface|$Name|||$Comments|$([int][bool]$Is64Bit)||$LineSpeed"
 
         foreach ($mode in $TrafficMode)
         {
             $parameters += "trafficmode_=$mode"
         }
 
-        $result = (Invoke-PRTGCommand -CommandPath addsensor5.htm -Parameters $parameters).Content
-
-        [regex]::Match($result, "<title>.*</title>", "IgnoreCase").Value -notmatch "System Error"
+        New-PRTGSensor -ParentId $ParentId -SensorType snmptraffic -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -OtherParameters $parameters
     }
 }
 
@@ -668,38 +665,330 @@ function New-PRTGSNMPDiskFreeSensor
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         [string]
         $Disk,
 
-        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
         [Alias('Id')]
         [Int]
         $ParentId,
 
-        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         [int]
         $Index,
 
-        [Parameter(ValueFromPipelineByPropertyName = $true)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [string[]]
         $Tags = @("PRTGFn_$Version", 'snmpdiskfreesensor', 'diskspacesensor', 'diskfree', 'snmp'),
 
-        [Parameter(ValueFromPipelineByPropertyName = $true)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateRange(1,5)]
         [int]
-        $Priority = 3
+        $Priority = 3,
+
+	    [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
+        [int]
+        $RefreshInterval = 0
     )
     Process
     {
         $parameters = @()
-
+	    $parameters += "disk_=1"
         $parameters += "disk__check=$Index|$Disk|Fixed Disk|"
+
+        New-PRTGSensor -ParentId $ParentId -SensorType snmpdiskfree -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -OtherParameters $parameters
+    }
+}
+
+function New-PRTGPingSensor
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+        [Alias('Id')]
+        [int]
+        $ParentId,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string]
+        $Name = 'Ping',
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string[]]
+        $Tags = @("PRTG_$Version", "pingsensor"),
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(1,5)]
+        [int]
+        $Priority = 3,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [int]
+        $Timeout = 5,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [int]
+        $Size = 32,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [int]
+        $Count = 5,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [int]
+        $Delay = 5,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
+        [int]
+        $RefreshInterval = 0
+    )
+
+    Process
+    {
+        $parameters = @()
+        $parameters += "timeout_=$Timeout"
+        $parameters += "size_=$Size"
+        $parameters += "count_=$Count"
+        $parameters += "delay_=$Delay"
+
+	    New-PRTGSensor -ParentId $ParentId -SensorType ping -Name $Name -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -OtherParameters $parameters
+    }
+}
+
+function New-PRTGRDPSensor
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+        [Alias('Id')]
+        [int]
+        $ParentId,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string]
+        $Name = 'RDP',
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string[]]
+        $Tags = @("PRTG_$Version", "rdpsensor"),
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(1,5)]
+        [int]
+        $Priority = 3,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [int]
+        $Timeout = 60,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [int]
+        $Port = 3389,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
+        [int]
+        $RefreshInterval = 0
+    )
+
+    Process
+    {
+        $parameters = @()
+        $parameters += "timeout_=$Timeout"
+        $parameters += "port_=$Port"
+
+	    New-PRTGSensor -ParentId $ParentId -SensorType remotedesktop -Name $Name -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -OtherParameters $parameters
+    }
+}
+
+function New-PRTGSNMPMemorySensor
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+        [Alias('Id')]
+        [int]
+        $ParentId,
+
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [string]
+        $Memory,
+
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [string]
+        $MemoryIndex,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string[]]
+        $Tags = @("PRTG_$Version", "snmpmemorysensor", "memory", "memorysensor", "snmp"),
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(1,5)]
+        [int]
+        $Priority = 3,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
+        [int]
+        $RefreshInterval = 0
+    )
+
+    Process
+    {
+        $parameters = @()
+        $parameters += "memory_=1"
+        $parameters += "memory__check=$MemoryIndex|$Memory|"
+
+	    New-PRTGSensor -ParentId $ParentId -SensorType snmpmemory -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -OtherParameters $parameters
+    }
+}
+
+function New-PRTGCPULoadSensor
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+        [Alias('Id')]
+        [int]
+        $ParentId,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string]
+        $Name = 'SNMP CPU Load',
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string[]]
+        $Tags = @("PRTG_$Version", "snmp", "cpu", "cpuloadsensor"),
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(1,5)]
+        [int]
+        $Priority = 3,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
+        [int]
+        $RefreshInterval = 0
+
+    )
+
+    Process
+    {
+        New-PRTGSensor -ParentId $ParentId -SensorType snmpcpu -Name $Name -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval
+    }
+}
+
+function New-PRTGSystemUptimeSensor
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+        [Alias('Id')]
+        [int]
+        $ParentId,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string]
+        $Name = 'SNMP System Uptime',
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string[]]
+        $Tags = @("PRTG_$Version", "snmp", "cpu", "cpuloadsensor"),
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(1,5)]
+        [int]
+        $Priority = 3,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
+        [int]
+        $RefreshInterval = 0
+
+    )
+
+    Process
+    {
+        New-PRTGSensor -ParentId $ParentId -SensorType snmpuptime -Name $Name -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval
+    }
+}
+
+function New-PRTGSensor
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+        [Alias('Id')]
+        [int]
+        $ParentId,
+
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [string]
+        $SensorType,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string]
+        $Name,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(1,5)]
+        [int]
+        $Priority = 3,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string[]]
+        $Tags,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
+        [int]
+        $RefreshInterval,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string[]]
+        $OtherParameters
+    )
+
+    Process
+    {
+        $parameters = @()
+        
+        $parameters += "name_=$Name"
         $parameters += "id=$ParentId"
-        $parameters += "priority_=$Priority"
         $parameters += "tags_=$($Tags -join ' ')"
-        $parameters += "sensortype=snmpdiskfree"
-        $parameters += "disk_=1"
+        $parameters += "priority_=$Priority"
+        $parameters += "sensortype=$SensorType"
+        $parameters += "accessrights_=1"
+
+        if ($RefreshInterval -gt 0)
+        {
+            $parameters += "intervalgroup=0"
+            $parameters += switch ($RefreshInterval)
+            {
+                30 {"interval_=30|30 seconds"}
+                60 {"interval_=60|60 seconds"}
+                300 {"interval_=300|5 minutes"}
+                600 {"interval_=600|10 minutes"}
+                900 {"interval_=900|15 minutes"}
+                1800 {"interval_=1800|30 minutes"}
+                3600 {"interval_=3600|1 hour"}
+                14400 {"interval_=14400|4 hours"}
+                21600 {"interval_=21600|6 hours"}
+                43200 {"interval_=43200|12 hours"}
+                86400 {"interval_=86400|24 hours"}
+            }
+        }
+
+        $parameters = $parameters + $OtherParameters | Select -Unique
 
         $result = (Invoke-PRTGCommand -CommandPath addsensor5.htm -Parameters $parameters).Content
 
@@ -707,50 +996,69 @@ function New-PRTGSNMPDiskFreeSensor
     }
 }
 
-# NOT COMPLETE
-# Examining the XML shows that some properties are missing from the object (passwords are in clear text)
 function New-PRTGDevice
 {
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
         [Alias('Id')]
         [int]
         $ParentId,
 
-        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         [string]
-        $DeviceName,
+        $Name,
 
-        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         [string]
         $Hostname,
 
-        [Parameter(ValueFromPipelineByPropertyName = $true)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [string]
         $DeviceIcon,
 
-        [Parameter(ValueFromPipelineByPropertyName = $true)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateSet('IPv4', 'IPv6')]
         [string]
         $IPVersion = 'IPv4',
 
-        [Parameter(ValueFromPipelineByPropertyName = $true)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [string[]]
-        $Tags
+        $Tags = @("PRTGFn_$Version")
     )
 
     Process
     {
 	    $parameters = @()
 
-        $parameters += "name_=$DeviceName"
+        $parameters += "name_=$Name"
         $parameters += "id=$ParentId"
         $parameters += "ipversion_=$([int] ($IPVersion -eq 'IPv6'))"
         $parameters += "tags_=$($Tags -join ' ')"
         $parameters += "host$([regex]::Match($IPVersion, 'v6').Value)_=$Hostname"
-        $parameters += "deviceicon_=$DeviceIcon"
+        
+        if ($DeviceIcon)
+        {
+            $parameters += "deviceicon_=$DeviceIcon"
+        }
+
+        # Might add parameters for these later on ...
+        # Without these, the resulting XML will differ slightly in the sense that passwords do not have the <encrypted /> tag.
+        # I haven't tested to see if that tag is added later on if the user decides not to inherit settings from parent, 
+        # but at least with snmpcommv1_ and snmpcommv2_ if they are not added here the password will default to "public" but will be in clear text, so best to have it here
+        $parameters += "accessrights_=1"
+        $parameters += "awssk_="
+        $parameters += "dbpassword_="
+        $parameters += "elevationpass_="
+        $parameters += "esxpassword_="
+        $parameters += "linuxloginpassword_="
+        $parameters += "privatekey_="
+        $parameters += "snmpencpass_="
+        $parameters += "snmpauthpass_="
+        $parameters += "snmpcommv1_=public"
+        $parameters += "snmpcommv2_=public"
+        $parameters += "windowsloginpassword_="
 
         $result = (Invoke-PRTGCommand -CommandPath adddevice2.htm -Parameters $parameters).Content
 
@@ -827,28 +1135,15 @@ function Get-PRTGTable
             $OtherParameters += "output=$OutputFormat"
         }
 
-        Invoke-PRTGCommand -CommandPath api/table.htm -Parameters $OtherParameters
+        Invoke-PRTGCommand -CommandPath api/table.xml -Parameters $OtherParameters
     }
 }
 
 function Invoke-PRTGCommand
 {
-    [CmdletBinding(DefaultParameterSetName = 'All')]
+    [CmdletBinding()]
     param
     (
-        [Parameter()]
-        [ValidateSet('HTTP', 'HTTPS')]
-        [string]
-        $Protocol = $Script:Protocol,
-
-        [Parameter()]
-        [string]
-        $Server = $Script:Server,
-
-        [Parameter()]
-        [int]
-        $Port = $Script:Port,
-
         [Parameter()]
         [string]
         $CommandPath,
@@ -858,24 +1153,16 @@ function Invoke-PRTGCommand
         $Id,
 
         [Parameter()]
-        [string]
-        $Username = $Script:Username,
-
-        [Parameter(ParameterSetName = 'PasswordHash')]
-        [int]
-        $PasswordHash = $Script:PasswordHash,
-
-        [Parameter(ParameterSetName = 'Password')]
-        [string]
-        $Password,
-
-        [Parameter()]
         [string[]]
         $Parameters,
 
         [Parameter()]
         [int]
-        $MaximumRedirection = 5
+        $MaximumRedirection = 5,
+
+        [Parameter()]
+        [switch]
+        $DoNotUseBasicParsing
     )
     Process
     {
@@ -898,22 +1185,6 @@ function Invoke-PRTGCommand
             $urlString += "id=$Id&"
         }
 
-        if ($Username)
-        {
-            $urlString += "username=$([System.Net.WebUtility]::UrlEncode($Username))&"
-        }
-
-        if ($Password)
-        {
-            $urlString += "password=$([System.Net.WebUtility]::UrlEncode($Password))&"
-        }
-        
-        # Since we're assigning the PasswordHash a default value we need to check it this way
-        if ($PasswordHash -and -not $Password)
-        {
-            $urlString += "passhash=$PasswordHash&"
-        }
-
         if ($Parameters)
         {
             $urlString += $Parameters -join '&'
@@ -927,10 +1198,15 @@ function Invoke-PRTGCommand
         try
         {
             Write-Debug $urlString
-            Invoke-WebRequest -Uri $urlString -UseBasicParsing -MaximumRedirection $MaximumRedirection
+            Invoke-WebRequest -Uri $urlString -MaximumRedirection $MaximumRedirection -UseBasicParsing:$UseBasicParsing -ErrorAction Stop -WebSession $Script:Session
         }
         catch
         {
+            if ($_.ErrorDetails.Message -eq 'The maximum redirection count has been exceeded. To increase the number of redirections allowed, supply a higher value to the -MaximumRedirection parameter.' )#-and $PSBoundParameters.ContainsKey('MaximumRedirection'))
+            {
+                return
+            }
+            
             $PSCmdlet.ThrowTerminatingError((New-ErrorRecord $_.Exception))
         }
     }
@@ -941,19 +1217,19 @@ function New-ErrorRecord
     [CmdletBinding(DefaultParameterSetName = 'All')]
     param
     (
-        [Parameter(ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, Position = 0, ParameterSetName = 'ErrorMessageSet')]
+        [Parameter(ValueFromPipeline, ValueFromPipelineByPropertyName, Position = 0, ParameterSetName = 'ErrorMessageSet')]
         [String]$ErrorMessage,
 
-        [Parameter(ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, Position = 0, ParameterSetName = 'ExceptionSet')]
+        [Parameter(ValueFromPipeline, ValueFromPipelineByPropertyName, Position = 0, ParameterSetName = 'ExceptionSet')]
         [System.Exception]$Exception,
 
-        [Parameter(ValueFromPipelineByPropertyName = $true, Position = 1)]
+        [Parameter(ValueFromPipelineByPropertyName, Position = 1)]
         [System.Management.Automation.ErrorCategory]$ErrorCategory = [System.Management.Automation.ErrorCategory]::NotSpecified,
 
-        [Parameter(ValueFromPipelineByPropertyName = $true, Position = 2)]
+        [Parameter(ValueFromPipelineByPropertyName, Position = 2)]
         [String]$ErrorId,
 
-        [Parameter(ValueFromPipelineByPropertyName = $true, Position = 3)]
+        [Parameter(ValueFromPipelineByPropertyName, Position = 3)]
         [Object]$TargetObject
     )
     
