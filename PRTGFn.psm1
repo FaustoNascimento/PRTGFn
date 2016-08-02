@@ -601,30 +601,34 @@ function New-PRTGSNMPTrafficSensor
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
-        [string]
-        $Interface,
-
         [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
         [Alias('Id')]
         [Int]
         $ParentId,
 
-        [Parameter(ValueFromPipelineByPropertyName)]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ParameterSetName = 'InterfaceName')]
+        [string]
+        $Interface,
+
+        [Parameter(ValueFromPipelineByPropertyName, ParameterSetName = 'InterfaceName')]
         [string]
         $Name = $Interface,
 
-        [Parameter(ValueFromPipelineByPropertyName)]
+        [Parameter(ValueFromPipelineByPropertyName, ParameterSetName = 'InterfaceName')]
         [string]
         $Comments = $Interface,
 
-        [Parameter(ValueFromPipelineByPropertyName)]
+        [Parameter(ValueFromPipelineByPropertyName, ParameterSetName = 'InterfaceName')]
         [Switch]
         $Is64Bit = $false,
 
-        [Parameter(ValueFromPipelineByPropertyName)]
+        [Parameter(ValueFromPipelineByPropertyName, ParameterSetName = 'InterfaceName')]
         [int64]
         $LineSpeed = 0,
+
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ParameterSetName = 'InterfaceNumber__Check')]
+        [string]
+        $InterfaceNumber__Check,
 
         [Parameter(ValueFromPipelineByPropertyName)]
         [string[]]
@@ -649,7 +653,15 @@ function New-PRTGSNMPTrafficSensor
     {
         $parameters = @()
         $parameters += "interfacenumber_=1"
-        $parameters += "interfacenumber__check=$Interface|$Name|||$Comments|$([int][bool]$Is64Bit)||$LineSpeed"
+        
+        if ($Interface)
+        {
+            $parameters += "interfacenumber__check=$Interface|$Name|||$Comments|$([int][bool]$Is64Bit)||$LineSpeed"
+        }
+        else 
+        {
+            $parameters += "interfacenumber__check=$InterfaceNumber__Check"
+        }
 
         foreach ($mode in $TrafficMode)
         {
@@ -665,18 +677,22 @@ function New-PRTGSNMPDiskFreeSensor
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
-        [string]
-        $Disk,
-
         [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
         [Alias('Id')]
         [Int]
         $ParentId,
 
-        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ParameterSetName = 'Disk')]
+        [string]
+        $Disk,
+
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ParameterSetName = 'Disk')]
         [int]
         $Index,
+
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ParameterSetName = 'Disk__Check')]
+        [string]
+        $Disk__Check,
 
         [Parameter(ValueFromPipelineByPropertyName)]
         [string[]]
@@ -696,7 +712,15 @@ function New-PRTGSNMPDiskFreeSensor
     {
         $parameters = @()
 	    $parameters += "disk_=1"
-        $parameters += "disk__check=$Index|$Disk|Fixed Disk|"
+        
+        if ($Disk)
+        {
+            $parameters += "disk__check=$Index|$Disk|Fixed Disk|"
+        }
+        else 
+        {
+            $parameters += "disk__check=$Disk__Check"
+        }
 
         New-PRTGSensor -ParentId $ParentId -SensorType snmpdiskfree -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -OtherParameters $parameters
     }
@@ -816,13 +840,17 @@ function New-PRTGSNMPMemorySensor
         [int]
         $ParentId,
 
-        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ParameterSetName = 'Memory')]
         [string]
         $Memory,
 
-        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ParameterSetName = 'Memory')]
         [string]
         $MemoryIndex,
+
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName, ParameterSetName = 'Memory__Check')]
+        [string]
+        $Memory__Check,
 
         [Parameter(ValueFromPipelineByPropertyName)]
         [string[]]
@@ -843,7 +871,15 @@ function New-PRTGSNMPMemorySensor
     {
         $parameters = @()
         $parameters += "memory_=1"
-        $parameters += "memory__check=$MemoryIndex|$Memory|"
+        
+        if ($Memory)
+        {
+            $parameters += "memory__check=$MemoryIndex|$Memory|"
+        }
+        else
+        {
+            $parameters += "memory__check=$Memory__Check"
+        }
 
 	    New-PRTGSensor -ParentId $ParentId -SensorType snmpmemory -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -OtherParameters $parameters
     }
@@ -1094,18 +1130,28 @@ function Get-PRTGSNMPSensorValues
             Start-Sleep -Milliseconds 500
         } until ($progress -eq 100)
         
-
-        $result = (Invoke-PRTGCommand -CommandPath addsensor4.htm -Id $DeviceId -Parameters "tmpid=$tmpid" -DoNotUseBasicParsing)
-        $parsedHtml = $result.ParsedHtml.
+        $result = (Invoke-PRTGCommand -CommandPath addsensor4.htm -Id $DeviceId -Parameters "tmpid=$tmpid")
         
-        $values = switch ($SensorType)
+        $elementName = switch ($SensorType)
         {
-            'snmpmemory' {$parsedHtml.getElementsByName('memory__check')}
-            'snmptraffic' {$parsedHtml.getElementsByName('interfacenumber__check')}
-            'snmpdiskfree' {$parsedHtml.getElementsByName('disk__check')}
+            'snmpmemory' {'memory__check'}
+            'snmptraffic' {'interfacenumber__check'}
+            'snmpdiskfree' {'disk__check'}
         }
 
-        $values | ForEach-Object {$_.Value}
+        $regex = ([regex]::Matches($result.Content, "<[^<]+$elementName[^>]*").Value | ForEach-Object {[xml] ($_ + "/>")}).Input.Value
+
+        $regex | ForEach-Object {
+            $value = $_
+            $name = switch ($SensorType)
+            {
+                'snmpmemory' {$value.Split('|')[1]}
+                'snmptraffic' {$value.Split('|')[6]}
+                'snmpdiskfree' {$value.Split('|')[1]}
+            }
+
+            New-Object -TypeName PSOBject -Property @{'Name' = $name; $elementName = $value} | Select Name, $elementName
+	    }
     }
 }
 
