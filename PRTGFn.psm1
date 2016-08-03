@@ -1284,7 +1284,7 @@ function Get-PrtgSnmpSensorValues
         $DeviceId,
 
         [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
-        [ValidateSet('SnmpMemory', 'SnmpTraffic', 'SnmpDiskFree', 'SnmpNetAppEnclosureStatus', 'SnmpNetAppLun', 'SnmpNetAppNetworkInterface', 'SnmpNetAppDiskFree')]        
+        [ValidateSet('SnmpMemory', 'SnmpTraffic', 'SnmpDiskFree', 'SnmpNetAppEnclosureStatus', 'SnmpNetAppLun', 'SnmpNetAppNetworkInterface', 'SnmpNetAppDiskFree', 'VmwareDatastoreExtern')]        
         [string]
         $SensorType
     )
@@ -1310,31 +1310,52 @@ function Get-PrtgSnmpSensorValues
         
         $elementName = switch ($SensorType)
         {
-            'SnmpMemory' {'memory__check'}
-            'SnmpTraffic' {'interfacenumber__check'}
-            'SnmpDiskFree' {'disk__check'}
-            'SnmpNetAppEnclosureStatus' {'enclosure__check'}
-            'SnmpNetAppLun' {'lun__check'}
-            'SnmpNetAppNetworkInterface' {'interface__check'}
-            'SnmpNetAppDiskFree' {'filesystem__check'}
+            'SnmpMemory' 
+            {
+                $index = 1
+                'memory__check'
+            }
+            'SnmpTraffic' 
+            {
+                $index = 6
+                'interfacenumber__check'
+            }
+            'SnmpDiskFree' 
+            {
+                $index = 1
+                'disk__check'
+            }
+            'SnmpNetAppEnclosureStatus' 
+            {
+                $index = 4
+                'enclosure__check'
+            }
+            'SnmpNetAppLun' 
+            {
+                $index = 0
+                'lun__check'
+            }
+            'SnmpNetAppNetworkInterface' 
+            {
+                $index = 0
+                'interface__check'
+            }
+            'SnmpNetAppDiskFree' 
+            {
+                $index = 0
+                'filesystem__check'
+            }
+            'VmwareDatastoreExtern' 
+            {
+                $index = 1
+                'datafieldlist__check'
+            }
         }
 
         $regex = ([regex]::Matches($result.Content, "<[^<]+$elementName[^>]*").Value | ForEach-Object {[xml] ($_ + "/>")}).Input.Value
 
         $regex | ForEach-Object {
-            $value = $_
-            $name = switch ($SensorType)
-            {
-                'SnmpMemory' {$value.Split('|')[1]}
-                'SnmpTraffic' {$value.Split('|')[6]}
-                'SnmpDiskFree' {$value.Split('|')[1]}
-                'SnmpNetAppEnclosureStatus' {$value.Split('|')[4]}
-                'SnmpNetAppLun' {$value.Split('|')[0]}
-                'SnmpNetAppNetworkInterface' {$value.Split('|')[0]}
-                'SnmpNetAppDiskFree' {$value.Split('|')[0]}
-            }
-
-            New-Object -TypeName PSOBject -Property @{'Name' = $name; $elementName = $value; 'ParentId' = $DeviceId} | Select ParentId, Name, $elementName
+            New-Object -TypeName PSOBject -Property @{'Name' = $_.Split('|')[$index]; $elementName = $_; 'ParentId' = $DeviceId} | Select ParentId, Name, $elementName
 	    }
     }
 }
