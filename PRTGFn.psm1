@@ -919,7 +919,7 @@ function New-PrtgSnmpNetAppIOSensor
     }
 }
 
-function New-PrtgSnmpNetAppSystemHealth
+function New-PrtgSnmpNetAppSystemHealthSensor
 {
     [CmdletBinding()]
     param
@@ -953,6 +953,47 @@ function New-PrtgSnmpNetAppSystemHealth
 	    New-PrtgSensor -ParentId $ParentId -SensorType snmpnetappsystemhealth -Name $Name -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval
     }
 }
+
+function New-PrtgVmwareDatastoreExternSensor
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+        [Alias('Id')]
+        [int]
+        $ParentId,
+        
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [Alias('datafieldlist__check')]
+        [string]
+        $Datastore,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string[]]
+        $Tags = @("Prtg_$Version", 'vmwaredatastoreexternsensor'),
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(1,5)]
+        [int]
+        $Priority = 3,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
+        [int]
+        $RefreshInterval = 0
+    )
+
+    Process
+    {
+	    $parameters = @()
+        $parameters += "datafieldlist_=1"
+        $parameters += "datafieldlist__check=$Datastore"
+
+        New-PrtgSensor -ParentId $ParentId -SensorType vmwaredatastoreextern -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -OtherParameters $parameters
+    }
+}
+
 
 function New-PrtgPingSensor
 {
