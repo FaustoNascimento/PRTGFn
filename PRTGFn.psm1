@@ -140,7 +140,7 @@ function Get-PrtgServerSettings
             $result.UpdateAvailable = $xmlStatus.PrtgUpdateAvailable -eq 'yes'
             $result.Version = $xmlStatus.Version
 
-            New-Object -TypeName PSObject -Property $result
+            [PSCustomObject] $result
         }
         catch
         {
@@ -596,7 +596,7 @@ function Copy-PrtgObject
     }
 }
 
-function New-PrtgSnmpTrafficSensor
+function New-PrtgSensorSnmpTraffic
 {
     [CmdletBinding()]
     param
@@ -645,7 +645,7 @@ function New-PrtgSnmpTrafficSensor
     }
 }
 
-function New-PrtgSnmpDiskFreeSensor
+function New-PrtgSensorSnmpDiskFree
 {
     [CmdletBinding()]
     param
@@ -684,7 +684,7 @@ function New-PrtgSnmpDiskFreeSensor
     }
 }
 
-function New-PrtgSnmpMemorySensor
+function New-PrtgSensorSnmpMemory
 {
     [CmdletBinding()]
     param
@@ -724,7 +724,7 @@ function New-PrtgSnmpMemorySensor
     }
 }
 
-function New-PrtgSnmpNetAppEnclosureSensor
+function New-PrtgSensorSnmpNetAppEnclosure
 {
     [CmdletBinding()]
     param
@@ -764,7 +764,7 @@ function New-PrtgSnmpNetAppEnclosureSensor
     }
 }
 
-function New-PrtgSnmpNetAppLogicalUnit
+function New-PrtgSensorSnmpNetAppLogicalUnit
 {
     [CmdletBinding()]
     param
@@ -804,7 +804,7 @@ function New-PrtgSnmpNetAppLogicalUnit
     }
 }
 
-function New-PrtgSnmpNetAppNetworkInterface
+function New-PrtgSensorSnmpNetAppNetworkInterface
 {
     [CmdletBinding()]
     param
@@ -844,7 +844,7 @@ function New-PrtgSnmpNetAppNetworkInterface
     }
 }
 
-function New-PrtgSnmpNetAppDiskFree
+function New-PrtgSensorSnmpNetAppDiskFree
 {
     [CmdletBinding()]
     param
@@ -884,7 +884,7 @@ function New-PrtgSnmpNetAppDiskFree
     }
 }
 
-function New-PrtgSnmpNetAppIOSensor
+function New-PrtgSensorSnmpNetAppIO
 {
     [CmdletBinding()]
     param
@@ -919,7 +919,7 @@ function New-PrtgSnmpNetAppIOSensor
     }
 }
 
-function New-PrtgSnmpNetAppSystemHealthSensor
+function New-PrtgSensorSnmpNetAppSystemHealth
 {
     [CmdletBinding()]
     param
@@ -954,7 +954,7 @@ function New-PrtgSnmpNetAppSystemHealthSensor
     }
 }
 
-function New-PrtgVmwareDatastoreExternSensor
+function New-PrtgSensorVmwareDatastoreExtern
 {
     [CmdletBinding()]
     param
@@ -994,8 +994,7 @@ function New-PrtgVmwareDatastoreExternSensor
     }
 }
 
-
-function New-PrtgPingSensor
+function New-PrtgSensorPing
 {
     [CmdletBinding()]
     param
@@ -1052,7 +1051,7 @@ function New-PrtgPingSensor
     }
 }
 
-function New-PrtgRdpSensor
+function New-PrtgSensorRdp
 {
     [CmdletBinding()]
     param
@@ -1099,7 +1098,7 @@ function New-PrtgRdpSensor
     }
 }
 
-function New-PrtgCpuLoadSensor
+function New-PrtgSensorCpuLoad
 {
     [CmdletBinding()]
     param
@@ -1134,7 +1133,7 @@ function New-PrtgCpuLoadSensor
     }
 }
 
-function New-PrtgSystemUptimeSensor
+function New-PrtgSensorSystemUptime
 {
     [CmdletBinding()]
     param
@@ -1244,6 +1243,56 @@ function New-PrtgSensor
     }
 }
 
+function New-PrtgGroup
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+        [Alias('Id')]
+        [int]
+        $ParentId,
+
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [string]
+        $Name,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string[]]
+        $Tags = @("PrtgFn_$Version")
+    )
+
+    Process
+    {
+        $parameters = @()
+
+        $parameters += "name_=$Name"
+        $parameters += "id=$ParentId"
+        $parameters += "tags_=$($Tags -join ' ')"
+
+        # Might add parameters for these later on ...
+        # Without these, the resulting XML will differ slightly in the sense that passwords do not have the <encrypted /> tag.
+        # I haven't tested to see if that tag is added later on if the user decides not to inherit settings from parent, 
+        # but at least with snmpcommv1_ and snmpcommv2_ if they are not added here the password will default to "public" but will be in clear text, so best to have it here
+        $parameters += "accessrights_=1"
+        $parameters += "awssk_="
+        $parameters += "dbpassword_="
+        $parameters += "elevationpass_="
+        $parameters += "esxpassword_="
+        $parameters += "linuxloginpassword_="
+        $parameters += "privatekey_="
+        $parameters += "snmpencpass_="
+        $parameters += "snmpauthpass_="
+        $parameters += "snmpcommv1_=public"
+        $parameters += "snmpcommv2_=public"
+        $parameters += "windowsloginpassword_="
+
+        $result = (Invoke-PrtgCommand -CommandPath addgroup2.htm -Parameters $parameters).Content
+
+        [regex]::Match($result, "<title>.*</title>", "IgnoreCase").Value -notmatch "System Error"
+    }
+}
+
 function New-PrtgDevice
 {
     [CmdletBinding()]
@@ -1314,7 +1363,7 @@ function New-PrtgDevice
     }
 }
 
-function Get-PrtgSnmpSensorValues
+function Get-PrtgSensorValidValues
 {
     [CmdletBinding()]
     param
@@ -1396,7 +1445,7 @@ function Get-PrtgSnmpSensorValues
         $regex = ([regex]::Matches($result.Content, "<[^<]+$elementName[^>]*").Value | ForEach-Object {[xml] ($_ + "/>")}).Input.Value
 
         $regex | ForEach-Object {
-            New-Object -TypeName PSOBject -Property @{'Name' = $_.Split('|')[$index]; $elementName = $_; 'ParentId' = $DeviceId} | Select ParentId, Name, $elementName
+            [PSCustomObject] @{'ParentId' = $DeviceId; 'Name' = $_.Split('|')[$index]; $elementName = $_}
 	    }
     }
 }
