@@ -148,7 +148,7 @@ function Get-PrtgServerSettings
         }
     }
 }
-x
+
 function Get-PrtgSensor
 {
     [CmdletBinding()]
