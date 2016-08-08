@@ -1044,7 +1044,7 @@ function New-PrtgSensorVmwareServerHostHealth
         [string]
         $Host,
 
-        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         [string]
         $Name = 'VMware Server Host Health',
 
@@ -1126,10 +1126,29 @@ function New-PrtgSensorOracleSql
         [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         [string]
         $SqlQueryFile,
-        
+
         [Parameter(ValueFromPipelineByPropertyName)]
         [string]
         $Name = 'Oracle SQL',
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string]
+        $Identifier,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateSet('SID', 'Service_Name')]
+        [string]
+        $IdentifierType = 'SID',
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateSet('NoTransaction', 'Rollback', 'Commit')]
+        [string]
+        $Transaction = 'NoTransaction',
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateSet('ChangeDB', 'CountRows', 'ReadData')]
+        [string]
+        $ExecutionMode = 'ChangeDB',
 
         [Parameter(ValueFromPipelineByPropertyName)]
         [string[]]
@@ -1150,6 +1169,10 @@ function New-PrtgSensorOracleSql
     {
 	    $parameters = @()
         $parameters += "sqlquery_=$SqlQueryFile|$SqlQueryFile||"
+        $parameters += "database_=$Identifier"
+        $parameters += "sid_type_=$([int]($IdentifierType -ne 'SID'))"
+        $parameters += "transaction_=$Transaction"
+        $parameters += "executionmode_=$ExecutionMode"
         $parameters += "channel1valuelookup_=|None"
         $parameters += "channel2valuelookup_=|None"
         $parameters += "channel3valuelookup_=|None"
