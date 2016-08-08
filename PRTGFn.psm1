@@ -954,6 +954,41 @@ function New-PrtgSensorSnmpNetAppSystemHealth
     }
 }
 
+function New-PrtgSensorSnmpHpSystemHealth
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+        [Alias('Id')]
+        [int]
+        $ParentId,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string]
+        $Name = 'SNMP HP ProLiant System Health',
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string[]]
+        $Tags = @("Prtg_$Version", 'snmphpsystemhealthsensor', 'systemhealth', 'snmphp', 'hp'),
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(1,5)]
+        [int]
+        $Priority = 3,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
+        [int]
+        $RefreshInterval = 0
+    )
+
+    Process
+    {
+	    New-PrtgSensor -ParentId $ParentId -SensorType snmphpsystemhealth -Name $Name -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval
+    }
+}
+
 function New-PrtgSensorVmwareDatastoreExtern
 {
     [CmdletBinding()]
@@ -994,6 +1029,50 @@ function New-PrtgSensorVmwareDatastoreExtern
     }
 }
 
+function New-PrtgSensorVmwareServerHostHealth
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+        [Alias('Id')]
+        [int]
+        $ParentId,
+        
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [Alias('datafieldlist__check')]
+        [string]
+        $Host,
+
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [string]
+        $Name = 'VMware Server Host Health',
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string[]]
+        $Tags = @("Prtg_$Version", 'esxserverhosthealthsensor'),
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(1,5)]
+        [int]
+        $Priority = 3,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
+        [int]
+        $RefreshInterval = 0
+    )
+
+    Process
+    {
+	    $parameters = @()
+        $parameters += "datafieldlist_=1"
+        $parameters += "datafieldlist__check=$Host"
+
+        New-PrtgSensor -ParentId $ParentId -SensorType esxserverhealthsensorextern -Name $Name -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -OtherParameters $parameters
+    }
+}
+
 function New-PrtgSensorPerfCounterIISApplicationPool
 {
     [CmdletBinding()]
@@ -1031,6 +1110,58 @@ function New-PrtgSensorPerfCounterIISApplicationPool
         $parameters += "instance__check=$IISWebsite"
 
         New-PrtgSensor -ParentId $ParentId -SensorType pciisapppool -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -OtherParameters $parameters
+    }
+}
+
+function New-PrtgSensorOracleSql
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+        [Alias('Id')]
+        [int]
+        $ParentId,
+        
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [string]
+        $SqlQueryFile,
+        
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string]
+        $Name = 'Oracle SQL',
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string[]]
+        $Tags = @("Prtg_$Version", 'sqlsensor'),
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(1,5)]
+        [int]
+        $Priority = 3,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
+        [int]
+        $RefreshInterval = 0
+    )
+
+    Process
+    {
+	    $parameters = @()
+        $parameters += "sqlquery_=$SqlQueryFile|$SqlQueryFile||"
+        $parameters += "channel1valuelookup_=|None"
+        $parameters += "channel2valuelookup_=|None"
+        $parameters += "channel3valuelookup_=|None"
+        $parameters += "channel4valuelookup_=|None"
+        $parameters += "channel5valuelookup_=|None"
+        $parameters += "channel6valuelookup_=|None"
+        $parameters += "channel7valuelookup_=|None"
+        $parameters += "channel8valuelookup_=|None"
+        $parameters += "channel9valuelookup_=|None"
+        $parameters += "channel10valuelookup_=|None"
+        
+        New-PrtgSensor -ParentId $ParentId -SensorType oraclev2 -Name $Name -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -OtherParameters $parameters
     }
 }
 
@@ -1414,7 +1545,7 @@ function Get-PrtgSensorValidValues
         $DeviceId,
 
         [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
-        [ValidateSet('SnmpMemory', 'SnmpTraffic', 'SnmpDiskFree', 'SnmpNetAppEnclosureStatus', 'SnmpNetAppLun', 'SnmpNetAppNetworkInterface', 'SnmpNetAppDiskFree', 'VmwareDatastoreExtern', 'PcIISAppPool')]        
+        [ValidateSet('SnmpMemory', 'SnmpTraffic', 'SnmpDiskFree', 'SnmpNetAppEnclosureStatus', 'SnmpNetAppLun', 'SnmpNetAppNetworkInterface', 'SnmpNetAppDiskFree', 'VmwareDatastoreExtern', 'PcIISAppPool', 'EsxServerHealthSensorExtern')]        
         [string]
         $SensorType
     )
@@ -1484,6 +1615,11 @@ function Get-PrtgSensorValidValues
             {
                 $index = 1
                 'instance__check'
+            }
+            'EsxServerHealthSensorExtern'
+            {
+                $index = 1
+                'datafieldlist__check'
             }
         }
 
