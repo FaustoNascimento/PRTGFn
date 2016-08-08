@@ -994,6 +994,46 @@ function New-PrtgSensorVmwareDatastoreExtern
     }
 }
 
+function New-PrtgSensorPerfCounterIISApplicationPool
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+        [Alias('Id')]
+        [int]
+        $ParentId,
+        
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [Alias('instance__check')]
+        [string]
+        $IISWebsite,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string[]]
+        $Tags = @("Prtg_$Version", 'pciisapppool', 'performancecounter'),
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(1,5)]
+        [int]
+        $Priority = 3,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
+        [int]
+        $RefreshInterval = 0
+    )
+
+    Process
+    {
+	    $parameters = @()
+        $parameters += "instance_=1"
+        $parameters += "instance__check=$IISWebsite"
+
+        New-PrtgSensor -ParentId $ParentId -SensorType pciisapppool -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -OtherParameters $parameters
+    }
+}
+
 function New-PrtgSensorPing
 {
     [CmdletBinding()]
@@ -1374,7 +1414,7 @@ function Get-PrtgSensorValidValues
         $DeviceId,
 
         [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
-        [ValidateSet('SnmpMemory', 'SnmpTraffic', 'SnmpDiskFree', 'SnmpNetAppEnclosureStatus', 'SnmpNetAppLun', 'SnmpNetAppNetworkInterface', 'SnmpNetAppDiskFree', 'VmwareDatastoreExtern')]        
+        [ValidateSet('SnmpMemory', 'SnmpTraffic', 'SnmpDiskFree', 'SnmpNetAppEnclosureStatus', 'SnmpNetAppLun', 'SnmpNetAppNetworkInterface', 'SnmpNetAppDiskFree', 'VmwareDatastoreExtern', 'PcIISAppPool')]        
         [string]
         $SensorType
     )
@@ -1439,6 +1479,11 @@ function Get-PrtgSensorValidValues
             {
                 $index = 1
                 'datafieldlist__check'
+            }
+            'PcIISAppPool'
+            {
+                $index = 1
+                'instance__check'
             }
         }
 
