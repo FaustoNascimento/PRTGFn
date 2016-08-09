@@ -628,7 +628,12 @@ function New-PrtgSensorSnmpTraffic
 	    [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
         [int]
-        $RefreshInterval = 0
+        $RefreshInterval = 0,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(0,5)]
+        [int]
+        $ErrorThreshold = 1
     )
     Process
     {
@@ -641,7 +646,7 @@ function New-PrtgSensorSnmpTraffic
             $parameters += "trafficmode_=$mode"
         }
 
-        New-PrtgSensor -ParentId $ParentId -SensorType snmptraffic -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -OtherParameters $parameters
+        New-PrtgSensor -ParentId $ParentId -SensorType snmptraffic -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -ErrorThreshold $ErrorThreshold -OtherParameters $parameters
     }
 }
 
@@ -672,7 +677,12 @@ function New-PrtgSensorSnmpDiskFree
 	    [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
         [int]
-        $RefreshInterval = 0
+        $RefreshInterval = 0,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(0,5)]
+        [int]
+        $ErrorThreshold = 1
     )
     Process
     {
@@ -680,7 +690,7 @@ function New-PrtgSensorSnmpDiskFree
 	    $parameters += "disk_=1"
         $parameters += "disk__check=$Disk"
 
-        New-PrtgSensor -ParentId $ParentId -SensorType snmpdiskfree -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -OtherParameters $parameters
+        New-PrtgSensor -ParentId $ParentId -SensorType snmpdiskfree -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -ErrorThreshold $ErrorThreshold -OtherParameters $parameters
     }
 }
 
@@ -711,7 +721,12 @@ function New-PrtgSensorSnmpMemory
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
         [int]
-        $RefreshInterval = 0
+        $RefreshInterval = 0,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(0,5)]
+        [int]
+        $ErrorThreshold = 1
     )
 
     Process
@@ -720,7 +735,7 @@ function New-PrtgSensorSnmpMemory
         $parameters += "memory_=1"
         $parameters += "memory__check=$Memory"
 
-	    New-PrtgSensor -ParentId $ParentId -SensorType snmpmemory -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -OtherParameters $parameters
+	    New-PrtgSensor -ParentId $ParentId -SensorType snmpmemory -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -ErrorThreshold $ErrorThreshold -OtherParameters $parameters
     }
 }
 
@@ -751,7 +766,12 @@ function New-PrtgSensorSnmpNetAppEnclosure
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
         [int]
-        $RefreshInterval = 0
+        $RefreshInterval = 0,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(0,5)]
+        [int]
+        $ErrorThreshold = 1
     )
 
     Process
@@ -760,7 +780,7 @@ function New-PrtgSensorSnmpNetAppEnclosure
         $parameters += "enclosure_=1"
         $parameters += "enclosure__check=$Enclosure"
 
-        New-PrtgSensor -ParentId $ParentId -SensorType snmpnetappenclosurestatus -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -OtherParameters $parameters
+        New-PrtgSensor -ParentId $ParentId -SensorType snmpnetappenclosurestatus -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -ErrorThreshold $ErrorThreshold -OtherParameters $parameters
     }
 }
 
@@ -791,7 +811,12 @@ function New-PrtgSensorSnmpNetAppLogicalUnit
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
         [int]
-        $RefreshInterval = 0
+        $RefreshInterval = 0,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(0,5)]
+        [int]
+        $ErrorThreshold = 1
     )
 
     Process
@@ -800,7 +825,7 @@ function New-PrtgSensorSnmpNetAppLogicalUnit
         $parameters += "lun_=1"
         $parameters += "lun__check=$LogicalUnit"
 
-        New-PrtgSensor -ParentId $ParentId -SensorType snmpnetapplun -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -OtherParameters $parameters
+        New-PrtgSensor -ParentId $ParentId -SensorType snmpnetapplun -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -ErrorThreshold $ErrorThreshold -OtherParameters $parameters
     }
 }
 
@@ -831,7 +856,12 @@ function New-PrtgSensorSnmpNetAppNetworkInterface
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
         [int]
-        $RefreshInterval = 0
+        $RefreshInterval = 0,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(0,5)]
+        [int]
+        $ErrorThreshold = 1
     )
 
     Process
@@ -840,7 +870,7 @@ function New-PrtgSensorSnmpNetAppNetworkInterface
         $parameters += "interface_=1"
         $parameters += "interface__check=$Interface"
 
-        New-PrtgSensor -ParentId $ParentId -SensorType snmpnetappnetworkinterface -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -OtherParameters $parameters
+        New-PrtgSensor -ParentId $ParentId -SensorType snmpnetappnetworkinterface -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -ErrorThreshold $ErrorThreshold -OtherParameters $parameters
     }
 }
 
@@ -871,7 +901,12 @@ function New-PrtgSensorSnmpNetAppDiskFree
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
         [int]
-        $RefreshInterval = 0
+        $RefreshInterval = 0,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(0,5)]
+        [int]
+        $ErrorThreshold = 1
     )
 
     Process
@@ -880,7 +915,7 @@ function New-PrtgSensorSnmpNetAppDiskFree
         $parameters += "filesystem_=1"
         $parameters += "filesystem__check=$Disk"
 
-        New-PrtgSensor -ParentId $ParentId -SensorType snmpnetappdiskfree -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -OtherParameters $parameters
+        New-PrtgSensor -ParentId $ParentId -SensorType snmpnetappdiskfree -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -ErrorThreshold $ErrorThreshold -OtherParameters $parameters
     }
 }
 
@@ -910,12 +945,17 @@ function New-PrtgSensorSnmpNetAppIO
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
         [int]
-        $RefreshInterval = 0
+        $RefreshInterval = 0,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(0,5)]
+        [int]
+        $ErrorThreshold = 1
     )
 
     Process
     {
-	    New-PrtgSensor -ParentId $ParentId -SensorType snmpnetappio -Name $Name -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval
+	    New-PrtgSensor -ParentId $ParentId -SensorType snmpnetappio -Name $Name -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -ErrorThreshold $ErrorThreshold
     }
 }
 
@@ -945,12 +985,17 @@ function New-PrtgSensorSnmpNetAppSystemHealth
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
         [int]
-        $RefreshInterval = 0
+        $RefreshInterval = 0,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(0,5)]
+        [int]
+        $ErrorThreshold = 1
     )
 
     Process
     {
-	    New-PrtgSensor -ParentId $ParentId -SensorType snmpnetappsystemhealth -Name $Name -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval
+	    New-PrtgSensor -ParentId $ParentId -SensorType snmpnetappsystemhealth -Name $Name -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -ErrorThreshold $ErrorThreshold
     }
 }
 
@@ -980,12 +1025,17 @@ function New-PrtgSensorSnmpHpSystemHealth
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
         [int]
-        $RefreshInterval = 0
+        $RefreshInterval = 0,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(0,5)]
+        [int]
+        $ErrorThreshold = 1
     )
 
     Process
     {
-	    New-PrtgSensor -ParentId $ParentId -SensorType snmphpsystemhealth -Name $Name -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval
+	    New-PrtgSensor -ParentId $ParentId -SensorType snmphpsystemhealth -Name $Name -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -ErrorThreshold $ErrorThreshold
     }
 }
 
@@ -1016,7 +1066,12 @@ function New-PrtgSensorVmwareDatastoreExtern
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
         [int]
-        $RefreshInterval = 0
+        $RefreshInterval = 0,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(0,5)]
+        [int]
+        $ErrorThreshold = 1
     )
 
     Process
@@ -1025,7 +1080,7 @@ function New-PrtgSensorVmwareDatastoreExtern
         $parameters += "datafieldlist_=1"
         $parameters += "datafieldlist__check=$Datastore"
 
-        New-PrtgSensor -ParentId $ParentId -SensorType vmwaredatastoreextern -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -OtherParameters $parameters
+        New-PrtgSensor -ParentId $ParentId -SensorType vmwaredatastoreextern -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -ErrorThreshold $ErrorThreshold -OtherParameters $parameters
     }
 }
 
@@ -1060,7 +1115,12 @@ function New-PrtgSensorVmwareServerHostHealth
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
         [int]
-        $RefreshInterval = 0
+        $RefreshInterval = 0,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(0,5)]
+        [int]
+        $ErrorThreshold = 1
     )
 
     Process
@@ -1069,7 +1129,7 @@ function New-PrtgSensorVmwareServerHostHealth
         $parameters += "datafieldlist_=1"
         $parameters += "datafieldlist__check=$Host"
 
-        New-PrtgSensor -ParentId $ParentId -SensorType esxserverhealthsensorextern -Name $Name -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -OtherParameters $parameters
+        New-PrtgSensor -ParentId $ParentId -SensorType esxserverhealthsensorextern -Name $Name -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -ErrorThreshold $ErrorThreshold -OtherParameters $parameters
     }
 }
 
@@ -1100,7 +1160,12 @@ function New-PrtgSensorPerfCounterIISApplicationPool
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
         [int]
-        $RefreshInterval = 0
+        $RefreshInterval = 0,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(0,5)]
+        [int]
+        $ErrorThreshold = 1
     )
 
     Process
@@ -1109,7 +1174,7 @@ function New-PrtgSensorPerfCounterIISApplicationPool
         $parameters += "instance_=1"
         $parameters += "instance__check=$IISWebsite"
 
-        New-PrtgSensor -ParentId $ParentId -SensorType pciisapppool -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -OtherParameters $parameters
+        New-PrtgSensor -ParentId $ParentId -SensorType pciisapppool -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -ErrorThreshold $ErrorThreshold -OtherParameters $parameters
     }
 }
 
@@ -1162,7 +1227,12 @@ function New-PrtgSensorOracleSql
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
         [int]
-        $RefreshInterval = 0
+        $RefreshInterval = 0,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(0,5)]
+        [int]
+        $ErrorThreshold = 1
     )
 
     Process
@@ -1184,7 +1254,7 @@ function New-PrtgSensorOracleSql
         $parameters += "channel9valuelookup_=|None"
         $parameters += "channel10valuelookup_=|None"
         
-        New-PrtgSensor -ParentId $ParentId -SensorType oraclev2 -Name $Name -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -OtherParameters $parameters
+        New-PrtgSensor -ParentId $ParentId -SensorType oraclev2 -Name $Name -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -ErrorThreshold $ErrorThreshold -OtherParameters $parameters
     }
 }
 
@@ -1230,7 +1300,12 @@ function New-PrtgSensorPing
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
         [int]
-        $RefreshInterval = 0
+        $RefreshInterval = 0,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(0,5)]
+        [int]
+        $ErrorThreshold = 1
     )
 
     Process
@@ -1241,7 +1316,7 @@ function New-PrtgSensorPing
         $parameters += "count_=$Count"
         $parameters += "delay_=$Delay"
 
-	    New-PrtgSensor -ParentId $ParentId -SensorType ping -Name $Name -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -OtherParameters $parameters
+	    New-PrtgSensor -ParentId $ParentId -SensorType ping -Name $Name -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -ErrorThreshold $ErrorThreshold -OtherParameters $parameters
     }
 }
 
@@ -1279,7 +1354,12 @@ function New-PrtgSensorRdp
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
         [int]
-        $RefreshInterval = 0
+        $RefreshInterval = 0,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(0,5)]
+        [int]
+        $ErrorThreshold = 1
     )
 
     Process
@@ -1288,7 +1368,7 @@ function New-PrtgSensorRdp
         $parameters += "timeout_=$Timeout"
         $parameters += "port_=$RDPPort"
 
-	    New-PrtgSensor -ParentId $ParentId -SensorType remotedesktop -Name $Name -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -OtherParameters $parameters
+	    New-PrtgSensor -ParentId $ParentId -SensorType remotedesktop -Name $Name -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -ErrorThreshold $ErrorThreshold -OtherParameters $parameters
     }
 }
 
@@ -1318,12 +1398,17 @@ function New-PrtgSensorCpuLoad
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
         [int]
-        $RefreshInterval = 0
+        $RefreshInterval = 0,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(0,5)]
+        [int]
+        $ErrorThreshold = 1
     )
 
     Process
     {
-        New-PrtgSensor -ParentId $ParentId -SensorType snmpcpu -Name $Name -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval
+        New-PrtgSensor -ParentId $ParentId -SensorType snmpcpu -Name $Name -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -ErrorThreshold $ErrorThreshold
     }
 }
 
@@ -1353,12 +1438,17 @@ function New-PrtgSensorSystemUptime
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
         [int]
-        $RefreshInterval = 0
+        $RefreshInterval = 0,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(0,5)]
+        [int]
+        $ErrorThreshold = 1
     )
 
     Process
     {
-        New-PrtgSensor -ParentId $ParentId -SensorType snmpuptime -Name $Name -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval
+        New-PrtgSensor -ParentId $ParentId -SensorType snmpuptime -Name $Name -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -ErrorThreshold $ErrorThreshold
     }
 }
 
@@ -1395,6 +1485,11 @@ function New-PrtgSensor
         $RefreshInterval,
 
         [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(0,5)]
+        [int]
+        $ErrorThreshold,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
         [string[]]
         $OtherParameters
     )
@@ -1413,6 +1508,7 @@ function New-PrtgSensor
         if ($RefreshInterval -gt 0)
         {
             $parameters += "intervalgroup=0"
+            $parameters += "errorintervalsdown_=$ErrorThreshold" 
             $parameters += switch ($RefreshInterval)
             {
                 30 {"interval_=30|30 seconds"}
