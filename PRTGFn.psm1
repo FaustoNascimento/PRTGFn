@@ -1742,11 +1742,321 @@ function Get-PrtgSensorValidValues
             }
         }
 
-        $regex = ([regex]::Matches($result.Content, "<[^<]+$elementName[^>]*").Value | ForEach-Object {[xml] ($_ + "/>")}).Input.Value
+        $regex = ([regex]::Matches($result.Content, "<[^<]+$elementName((?!\/?>).)*").Value | ForEach-Object {[xml] ($_ + "/>")}).Input.Value
 
         $regex | ForEach-Object {
             [PSCustomObject] @{'ParentId' = $DeviceId; 'Name' = $_.Split('|')[$index]; $elementName = $_}
 	    }
+    }
+}
+
+function New-PrtgTriggerVolume
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+        [Alias('objid', 'ObjectId')]
+        [int]
+        $Id
+    )
+
+    DynamicParam
+    {
+        $dictionary = New-Object System.Management.Automation.RuntimeDefinedParameterDictionary
+
+        $values = Get-PrtgNewTriggerValues -Id $Id -Class Volume
+
+        foreach ($value in $values)
+        {
+            $validateSet = $null
+            if ($value.Type -eq 'select')
+            {
+                $validateSet = $value.Items.Value
+            }
+
+            $parameter = New-DynamicParameterFn -Name $value.Name -Type string -DefaultValue $value.Default -ValidateSetAttribute $validateSet -ValueFromPipelineByPropertyName $true
+            $dictionary.Add($value.Name, $parameter)
+        }
+
+        $dictionary
+    }
+
+    Process
+    {
+        $values = @{}
+        foreach ($key in $dictionary.Keys)
+        {
+            $values.($key) = $dictionary[$key].Value
+        }
+
+        New-PrtgTrigger -Id $Id -Class Volume -Values $values
+    }
+}
+
+function New-PrtgTriggerState
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+        [Alias('objid', 'ObjectId')]
+        [int]
+        $Id
+    )
+
+    DynamicParam
+    {
+        $dictionary = New-Object System.Management.Automation.RuntimeDefinedParameterDictionary
+
+        $values = Get-PrtgNewTriggerValues -Id $Id -Class State
+
+        foreach ($value in $values)
+        {
+            $validateSet = $null
+            if ($value.Type -eq 'select')
+            {
+                $validateSet = $value.Items.Value
+            }
+
+            $parameter = New-DynamicParameterFn -Name $value.Name -Type string -DefaultValue $value.Default -ValidateSetAttribute $validateSet -ValueFromPipelineByPropertyName $true
+            $dictionary.Add($value.Name, $parameter)
+        }
+
+        $dictionary
+    }
+
+    Process
+    {
+        $values = @{}
+        foreach ($key in $dictionary.Keys)
+        {
+            $values.($key) = $dictionary[$key].Value
+        }
+
+        New-PrtgTrigger -Id $Id -Class State -Values $values
+    }
+}
+
+function New-PrtgTriggerThreshold
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+        [Alias('objid', 'ObjectId')]
+        [int]
+        $Id
+    )
+
+    DynamicParam
+    {
+        $dictionary = New-Object System.Management.Automation.RuntimeDefinedParameterDictionary
+
+        $values = Get-PrtgNewTriggerValues -Id $Id -Class Threshold
+
+        foreach ($value in $values)
+        {
+            $validateSet = $null
+            if ($value.Type -eq 'select')
+            {
+                $validateSet = $value.Items.Value
+            }
+
+            $parameter = New-DynamicParameterFn -Name $value.Name -Type string -DefaultValue $value.Default -ValidateSetAttribute $validateSet -ValueFromPipelineByPropertyName $true
+            $dictionary.Add($value.Name, $parameter)
+        }
+
+        $dictionary
+    }
+
+    Process
+    {
+        $values = @{}
+        foreach ($key in $dictionary.Keys)
+        {
+            $values.($key) = $dictionary[$key].Value
+        }
+
+        New-PrtgTrigger -Id $Id -Class Threshold -Values $values
+    }
+}
+
+function New-PrtgTriggerChange
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+        [Alias('objid', 'ObjectId')]
+        [int]
+        $Id
+    )
+
+    DynamicParam
+    {
+        $dictionary = New-Object System.Management.Automation.RuntimeDefinedParameterDictionary
+
+        $values = Get-PrtgNewTriggerValues -Id $Id -Class Change
+
+        foreach ($value in $values)
+        {
+            $validateSet = $null
+            if ($value.Type -eq 'select')
+            {
+                $validateSet = $value.Items.Value
+            }
+
+            $parameter = New-DynamicParameterFn -Name $value.Name -Type string -DefaultValue $value.Default -ValidateSetAttribute $validateSet -ValueFromPipelineByPropertyName $true
+            $dictionary.Add($value.Name, $parameter)
+        }
+
+        $dictionary
+    }
+
+    Process
+    {
+        $values = @{}
+        foreach ($key in $dictionary.Keys)
+        {
+            $values.($key) = $dictionary[$key].Value
+        }
+
+        New-PrtgTrigger -Id $Id -Class Change -Values $values
+    }
+}
+
+function New-PrtgTriggerSpeed
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+        [Alias('objid', 'ObjectId')]
+        [int]
+        $Id
+    )
+
+    DynamicParam
+    {
+        $dictionary = New-Object System.Management.Automation.RuntimeDefinedParameterDictionary
+
+        $values = Get-PrtgNewTriggerValues -Id $Id -Class Speed
+
+        foreach ($value in $values)
+        {
+            $validateSet = $null
+            if ($value.Type -eq 'select')
+            {
+                $validateSet = $value.Items.Value
+            }
+
+            $parameter = New-DynamicParameterFn -Name $value.Name -Type string -DefaultValue $value.Default -ValidateSetAttribute $validateSet -ValueFromPipelineByPropertyName $true
+            $dictionary.Add($value.Name, $parameter)
+        }
+
+        $dictionary
+    }
+
+    Process
+    {
+        $values = @{}
+        foreach ($key in $dictionary.Keys)
+        {
+            $values.($key) = $dictionary[$key].Value
+        }
+
+        New-PrtgTrigger -Id $Id -Class Speed -Values $values
+    }
+}
+
+function New-PrtgTrigger
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+        [Alias('objid', 'ObjectId')]
+        [int]
+        $Id,
+
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [ValidateSet('Volume', 'State', 'Threshold', 'Change', 'Speed')]
+        [string]
+        $Class,
+
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [Hashtable]
+        $Values
+    )
+
+    Process
+    {
+        $properValues = @()
+        
+        foreach ($value in $Values.Keys)
+        {
+            $properValues += "$value=$($Values[$value])"
+        }
+        
+        $properValues += 'subid=new'
+        $properValues += "class=$Class"
+        $properValues += "objecttype=nodetrigger"
+
+        Invoke-PrtgCommand -CommandPath editsettings -Id $Id -Parameters $properValues
+    }
+}
+
+function Get-PrtgNewTriggerValues
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+        [Alias('objid', 'ObjectId')]
+        [int]
+        $Id,
+
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [ValidateSet('Volume', 'State', 'Threshold', 'Change', 'Speed')]
+        [string]
+        $Class
+    )
+
+    Process
+    {
+        $result = Invoke-PrtgCommand -CommandPath api/newtrigger.json -Parameters "parid=$Id", "class=$Class"
+        $properties = ($result.Content | ConvertFrom-Json).PSObject.Properties | Where Name -match '_' 
+        
+        foreach ($property in $properties)
+        {
+            if (-not [regex]::Matches($property.Value, "<[^<]+$").Value.Contains('/'))
+            {
+                $property.Value = $property.Value.Replace('>', '/>')
+            }
+
+            $xml = [xml]$property.Value
+
+            foreach ($childNode in $xml.ChildNodes)
+            {
+                $option = @{}
+                $option.Name = $childNode.Name
+                $option.Default = if ($childNode.Value) {$childNode.Value} else {$childNode.ChildNodes[0].Value}
+                $option.Items = @()
+                $option.Type = $xml.DocumentElement.ToString()
+
+                foreach ($childChildNode in $childNode.ChildNodes)
+                {
+                    $child = @{}
+                    $child.Value = $childChildNode.Value
+                    $child.Name = $childChildNode.'#text'
+                    
+                    $option.Items += [PSCustomObject] $child
+                }
+
+                [PSCustomObject] $option
+            }
+        }
     }
 }
 
@@ -1846,7 +2156,12 @@ function Invoke-PrtgCommand
 
         [Parameter()]
         [switch]
-        $DoNotUseBasicParsing
+        $DoNotUseBasicParsing,
+
+        [Parameter()]
+        [ValidateSet('Get', 'Post')]
+        [string]
+        $Method = 'Get'
     )
     Process
     {
@@ -1882,7 +2197,7 @@ function Invoke-PrtgCommand
         try
         {
             Write-Debug $urlString
-            Invoke-WebRequest -Uri $urlString -MaximumRedirection $MaximumRedirection -UseBasicParsing:(-not $DoNotUseBasicParsing) -ErrorAction Stop -WebSession $Script:Session
+            Invoke-WebRequest -Uri $urlString -MaximumRedirection $MaximumRedirection -UseBasicParsing:(-not $DoNotUseBasicParsing) -ErrorAction Stop -WebSession $Script:Session -Method $Method
         }
         catch
         {
