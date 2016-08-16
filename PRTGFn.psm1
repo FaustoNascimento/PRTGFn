@@ -1877,7 +1877,7 @@ function New-PrtgSensor
         {
             $xml = ([xml](Get-PrtgTable -Content sensors -OtherParameters $ValidationParameters).Content).Sensors
             
-            if ($xml.TotalCount -gt 0 -and (-not $ValidateName -or ($ValidateName -and ($xml.Item | Where-Object Sensor -match $ValidateName)))
+            if ($xml.TotalCount -gt 0 -and (-not $ValidateName -or ($ValidateName -and ($xml.Item | Where-Object Sensor -match $ValidateName))))
             {
                 Write-Verbose "Sensor already exists, skipping it"
                 return
