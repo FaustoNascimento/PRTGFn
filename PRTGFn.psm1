@@ -633,20 +633,41 @@ function New-PrtgSensorSnmpTraffic
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateRange(0,5)]
         [int]
-        $ErrorThreshold = 1
+        $ErrorThreshold = 1,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [switch]
+        $ValidateDoesNotExist
     )
     Process
     {
-        $parameters = @()
-        $parameters += "interfacenumber_=1"
-        $parameters += "interfacenumber__check=$Interface"
+        $validationParameters = @()
+        $validationParameters += "filter_parentid=$ParentId"
+        $validationParameters += 'filter_type=snmptraffic'
+        $validateName = $Interface.Split('|')[6]
+
+        $otherParameters = @()
+        $otherParameters += "interfacenumber_=1"
+        $otherParameters += "interfacenumber__check=$Interface"
 
         foreach ($mode in $TrafficMode)
         {
-            $parameters += "trafficmode_=$mode"
+            $otherParameters += "trafficmode_=$mode"
         }
 
-        New-PrtgSensor -ParentId $ParentId -SensorType snmptraffic -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -ErrorThreshold $ErrorThreshold -OtherParameters $parameters
+        $parameters = @{}
+        $parameters.ParentId = $ParentId
+        $parameters.SensorType = 'snmptraffic'
+        $parameters.Priority = $Priority
+        $parameters.Tags = $Tags
+        $parameters.RefreshInterval = $RefreshInterval
+        $parameters.ErrorThreshold = $ErrorThreshold
+        $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
+        $parameters.ValidationParameters = $validationParameters
+        $parameters.ValidateName = $validateName
+        $parameters.OtherParameters = $otherParameters
+        
+        New-PrtgSensor @parameters
     }
 }
 
@@ -682,15 +703,36 @@ function New-PrtgSensorSnmpDiskFree
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateRange(0,5)]
         [int]
-        $ErrorThreshold = 1
+        $ErrorThreshold = 1,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [switch]
+        $ValidateDoesNotExist
     )
     Process
     {
-        $parameters = @()
-	    $parameters += "disk_=1"
-        $parameters += "disk__check=$Disk"
+        $validationParameters = @()
+        $validationParameters += "filter_parentid=$ParentId"
+        $validationParameters += 'filter_type=snmpdiskfree'
+        $validateName = $Disk.Split('|')[1]
 
-        New-PrtgSensor -ParentId $ParentId -SensorType snmpdiskfree -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -ErrorThreshold $ErrorThreshold -OtherParameters $parameters
+        $otherParameters = @()
+	    $otherParameters += "disk_=1"
+        $otherParameters += "disk__check=$Disk"
+
+        $parameters = @{}
+        $parameters.ParentId = $ParentId
+        $parameters.SensorType = 'snmpdiskfree'
+        $parameters.Priority = $Priority
+        $parameters.Tags = $Tags
+        $parameters.RefreshInterval = $RefreshInterval
+        $parameters.ErrorThreshold = $ErrorThreshold
+        $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
+        $parameters.ValidationParameters = $validationParameters
+        $parameters.ValidateName = $validateName
+        $parameters.OtherParameters = $otherParameters
+        
+        New-PrtgSensor @parameters
     }
 }
 
@@ -726,16 +768,37 @@ function New-PrtgSensorSnmpMemory
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateRange(0,5)]
         [int]
-        $ErrorThreshold = 1
+        $ErrorThreshold = 1,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [switch]
+        $ValidateDoesNotExist
     )
 
     Process
     {
-        $parameters = @()
-        $parameters += "memory_=1"
-        $parameters += "memory__check=$Memory"
+        $validationParameters = @()
+        $validationParameters += "filter_parentid=$ParentId"
+        $validationParameters += 'filter_type=snmpmemory'
+        $validateName = $Memory.Split('|')[1]
 
-	    New-PrtgSensor -ParentId $ParentId -SensorType snmpmemory -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -ErrorThreshold $ErrorThreshold -OtherParameters $parameters
+        $otherParameters = @()
+        $otherParameters += "memory_=1"
+        $otherParameters += "memory__check=$Memory"
+
+        $parameters = @{}
+        $parameters.ParentId = $ParentId
+        $parameters.SensorType = 'snmpmemory'
+        $parameters.Priority = $Priority
+        $parameters.Tags = $Tags
+        $parameters.RefreshInterval = $RefreshInterval
+        $parameters.ErrorThreshold = $ErrorThreshold
+        $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
+        $parameters.ValidationParameters = $validationParameters
+        $parameters.ValidateName = $validateName
+        $parameters.OtherParameters = $otherParameters
+        
+        New-PrtgSensor @parameters
     }
 }
 
@@ -771,16 +834,37 @@ function New-PrtgSensorSnmpNetAppEnclosure
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateRange(0,5)]
         [int]
-        $ErrorThreshold = 1
+        $ErrorThreshold = 1,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [switch]
+        $ValidateDoesNotExist
     )
 
     Process
     {
-	    $parameters = @()
-        $parameters += "enclosure_=1"
-        $parameters += "enclosure__check=$Enclosure"
+	    $validationParameters = @()
+        $validationParameters += "filter_parentid=$ParentId"
+        $validationParameters += 'filter_type=snmpnetappenclosurestatus'
+        $validateName = $Enclosure.Split('|')[4]
 
-        New-PrtgSensor -ParentId $ParentId -SensorType snmpnetappenclosurestatus -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -ErrorThreshold $ErrorThreshold -OtherParameters $parameters
+        $otherParameters = @()
+        $otherParameters += "enclosure_=1"
+        $otherParameters += "enclosure__check=$Enclosure"
+
+        $parameters = @{}
+        $parameters.ParentId = $ParentId
+        $parameters.SensorType = 'snmpnetappenclosurestatus'
+        $parameters.Priority = $Priority
+        $parameters.Tags = $Tags
+        $parameters.RefreshInterval = $RefreshInterval
+        $parameters.ErrorThreshold = $ErrorThreshold
+        $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
+        $parameters.ValidationParameters = $validationParameters
+        $parameters.ValidateName = $validateName
+        $parameters.OtherParameters = $otherParameters
+        
+        New-PrtgSensor @parameters
     }
 }
 
@@ -816,16 +900,37 @@ function New-PrtgSensorSnmpNetAppLogicalUnit
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateRange(0,5)]
         [int]
-        $ErrorThreshold = 1
+        $ErrorThreshold = 1,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [switch]
+        $ValidateDoesNotExist
     )
 
     Process
     {
-	    $parameters = @()
-        $parameters += "lun_=1"
-        $parameters += "lun__check=$LogicalUnit"
+	    $validationParameters = @()
+        $validationParameters += "filter_parentid=$ParentId"
+        $validationParameters += 'filter_type=snmpnetapplun'
+        $validateName = $LogicalUnit.Split('|')[0]
 
-        New-PrtgSensor -ParentId $ParentId -SensorType snmpnetapplun -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -ErrorThreshold $ErrorThreshold -OtherParameters $parameters
+        $otherParameters = @()
+        $otherParameters += "lun_=1"
+        $otherParameters += "lun__check=$LogicalUnit"
+
+        $parameters = @{}
+        $parameters.ParentId = $ParentId
+        $parameters.SensorType = 'snmpnetapplun'
+        $parameters.Priority = $Priority
+        $parameters.Tags = $Tags
+        $parameters.RefreshInterval = $RefreshInterval
+        $parameters.ErrorThreshold = $ErrorThreshold
+        $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
+        $parameters.ValidationParameters = $validationParameters
+        $parameters.ValidateName = $validateName
+        $parameters.OtherParameters = $otherParameters
+        
+        New-PrtgSensor @parameters
     }
 }
 
@@ -861,16 +966,37 @@ function New-PrtgSensorSnmpNetAppNetworkInterface
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateRange(0,5)]
         [int]
-        $ErrorThreshold = 1
+        $ErrorThreshold = 1,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [switch]
+        $ValidateDoesNotExist
     )
 
     Process
     {
-	    $parameters = @()
-        $parameters += "interface_=1"
-        $parameters += "interface__check=$Interface"
+	    $validationParameters = @()
+        $validationParameters += "filter_parentid=$ParentId"
+        $validationParameters += 'filter_type=snmpnetappnetworkinterface'
+        $validateName = $Interface.Split('|')[0]
 
-        New-PrtgSensor -ParentId $ParentId -SensorType snmpnetappnetworkinterface -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -ErrorThreshold $ErrorThreshold -OtherParameters $parameters
+        $otherParameters = @()
+        $otherParameters += "interface_=1"
+        $otherParameters += "interface__check=$Interface"
+
+        $parameters = @{}
+        $parameters.ParentId = $ParentId
+        $parameters.SensorType = 'snmpnetappnetworkinterface'
+        $parameters.Priority = $Priority
+        $parameters.Tags = $Tags
+        $parameters.RefreshInterval = $RefreshInterval
+        $parameters.ErrorThreshold = $ErrorThreshold
+        $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
+        $parameters.ValidationParameters = $validationParameters
+        $parameters.ValidateName = $validateName
+        $parameters.OtherParameters = $otherParameters
+        
+        New-PrtgSensor @parameters
     }
 }
 
@@ -906,16 +1032,37 @@ function New-PrtgSensorSnmpNetAppDiskFree
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateRange(0,5)]
         [int]
-        $ErrorThreshold = 1
+        $ErrorThreshold = 1,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [switch]
+        $ValidateDoesNotExist
     )
 
     Process
     {
-	    $parameters = @()
-        $parameters += "filesystem_=1"
-        $parameters += "filesystem__check=$Disk"
+	    $validationParameters = @()
+        $validationParameters += "filter_parentid=$ParentId"
+        $validationParameters += 'filter_type=snmpnetappdiskfree'
+        $validateName = $Disk.Split('|')[0]
 
-        New-PrtgSensor -ParentId $ParentId -SensorType snmpnetappdiskfree -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -ErrorThreshold $ErrorThreshold -OtherParameters $parameters
+        $otherParameters = @()
+        $otherParameters += "filesystem_=1"
+        $otherParameters += "filesystem__check=$Disk"
+
+        $parameters = @{}
+        $parameters.ParentId = $ParentId
+        $parameters.SensorType = 'snmpnetappdiskfree'
+        $parameters.Priority = $Priority
+        $parameters.Tags = $Tags
+        $parameters.RefreshInterval = $RefreshInterval
+        $parameters.ErrorThreshold = $ErrorThreshold
+        $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
+        $parameters.ValidationParameters = $validationParameters
+        $parameters.ValidateName = $validateName
+        $parameters.OtherParameters = $otherParameters
+        
+        New-PrtgSensor @parameters
     }
 }
 
@@ -950,12 +1097,31 @@ function New-PrtgSensorSnmpNetAppIO
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateRange(0,5)]
         [int]
-        $ErrorThreshold = 1
+        $ErrorThreshold = 1,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [switch]
+        $ValidateDoesNotExist
     )
 
     Process
     {
-	    New-PrtgSensor -ParentId $ParentId -SensorType snmpnetappio -Name $Name -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -ErrorThreshold $ErrorThreshold
+	    $validationParameters = @()
+        $validationParameters += "filter_parentid=$ParentId"
+        $validationParameters += 'filter_type=snmpnetappio'
+
+        $parameters = @{}
+        $parameters.ParentId = $ParentId
+        $parameters.SensorType = 'snmpnetappio'
+        $parameters.Name = $Name
+        $parameters.Priority = $Priority
+        $parameters.Tags = $Tags
+        $parameters.RefreshInterval = $RefreshInterval
+        $parameters.ErrorThreshold = $ErrorThreshold
+        $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
+        $parameters.ValidationParameters = $validationParameters
+        
+        New-PrtgSensor @parameters
     }
 }
 
@@ -990,12 +1156,31 @@ function New-PrtgSensorSnmpNetAppSystemHealth
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateRange(0,5)]
         [int]
-        $ErrorThreshold = 1
+        $ErrorThreshold = 1,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [switch]
+        $ValidateDoesNotExist
     )
 
     Process
     {
-	    New-PrtgSensor -ParentId $ParentId -SensorType snmpnetappsystemhealth -Name $Name -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -ErrorThreshold $ErrorThreshold
+	    $validationParameters = @()
+        $validationParameters += "filter_parentid=$ParentId"
+        $validationParameters += 'filter_type=snmpnetappsystemhealth'
+
+        $parameters = @{}
+        $parameters.ParentId = $ParentId
+        $parameters.SensorType = 'snmpnetappsystemhealth'
+        $parameters.Name = $Name
+        $parameters.Priority = $Priority
+        $parameters.Tags = $Tags
+        $parameters.RefreshInterval = $RefreshInterval
+        $parameters.ErrorThreshold = $ErrorThreshold
+        $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
+        $parameters.ValidationParameters = $validationParameters
+        
+        New-PrtgSensor @parameters
     }
 }
 
@@ -1030,16 +1215,35 @@ function New-PrtgSensorSnmpHpSystemHealth
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateRange(0,5)]
         [int]
-        $ErrorThreshold = 1
+        $ErrorThreshold = 1,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [switch]
+        $ValidateDoesNotExist
     )
 
     Process
     {
-	    New-PrtgSensor -ParentId $ParentId -SensorType snmphpsystemhealth -Name $Name -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -ErrorThreshold $ErrorThreshold
+	    $validationParameters = @()
+        $validationParameters += "filter_parentid=$ParentId"
+        $validationParameters += 'filter_type=snmphpsystemhealth'
+
+        $parameters = @{}
+        $parameters.ParentId = $ParentId
+        $parameters.SensorType = 'snmphpsystemhealth'
+        $parameters.Name = $Name
+        $parameters.Priority = $Priority
+        $parameters.Tags = $Tags
+        $parameters.RefreshInterval = $RefreshInterval
+        $parameters.ErrorThreshold = $ErrorThreshold
+        $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
+        $parameters.ValidationParameters = $validationParameters
+        
+        New-PrtgSensor @parameters
     }
 }
 
-function New-PrtgSensorVmwareDatastoreExtern
+function New-PrtgSensorVmwareDatastore
 {
     [CmdletBinding()]
     param
@@ -1071,16 +1275,37 @@ function New-PrtgSensorVmwareDatastoreExtern
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateRange(0,5)]
         [int]
-        $ErrorThreshold = 1
+        $ErrorThreshold = 1,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [switch]
+        $ValidateDoesNotExist
     )
 
     Process
     {
-	    $parameters = @()
-        $parameters += "datafieldlist_=1"
-        $parameters += "datafieldlist__check=$Datastore"
+	    $validationParameters = @()
+        $validationParameters += "filter_parentid=$ParentId"
+        $validationParameters += 'filter_type=vmwaredatastoreextern'
+        $validateName = $Datastore.Split('|')[1]
 
-        New-PrtgSensor -ParentId $ParentId -SensorType vmwaredatastoreextern -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -ErrorThreshold $ErrorThreshold -OtherParameters $parameters
+        $otherParameters = @()
+        $otherParameters += "datafieldlist_=1"
+        $otherParameters += "datafieldlist__check=$Datastore"
+
+        $parameters = @{}
+        $parameters.ParentId = $ParentId
+        $parameters.SensorType = 'vmwaredatastoreextern'
+        $parameters.Priority = $Priority
+        $parameters.Tags = $Tags
+        $parameters.RefreshInterval = $RefreshInterval
+        $parameters.ErrorThreshold = $ErrorThreshold
+        $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
+        $parameters.ValidationParameters = $validationParameters
+        $parameters.ValidateName = $validateName
+        $parameters.OtherParameters = $otherParameters
+        
+        New-PrtgSensor @parameters
     }
 }
 
@@ -1120,16 +1345,36 @@ function New-PrtgSensorVmwareServerHostHealth
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateRange(0,5)]
         [int]
-        $ErrorThreshold = 1
+        $ErrorThreshold = 1,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [switch]
+        $ValidateDoesNotExist
     )
 
     Process
     {
-	    $parameters = @()
-        $parameters += "datafieldlist_=1"
-        $parameters += "datafieldlist__check=$Host"
+	    $validationParameters = @()
+        $validationParameters += "filter_parentid=$ParentId"
+        $validationParameters += 'filter_type=esxserverhealthsensorextern'
 
-        New-PrtgSensor -ParentId $ParentId -SensorType esxserverhealthsensorextern -Name $Name -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -ErrorThreshold $ErrorThreshold -OtherParameters $parameters
+        $otherParameters = @()
+        $otherParameters += "datafieldlist_=1"
+        $otherParameters += "datafieldlist__check=$Host"
+
+        $parameters = @{}
+        $parameters.ParentId = $ParentId
+        $parameters.SensorType = 'esxserverhealthsensorextern'
+        $parameters.Name = $Name
+        $parameters.Priority = $Priority
+        $parameters.Tags = $Tags
+        $parameters.RefreshInterval = $RefreshInterval
+        $parameters.ErrorThreshold = $ErrorThreshold
+        $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
+        $parameters.ValidationParameters = $validationParameters
+        $parameters.OtherParameters = $otherParameters
+        
+        New-PrtgSensor @parameters
     }
 }
 
@@ -1165,16 +1410,37 @@ function New-PrtgSensorPerfCounterIISApplicationPool
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateRange(0,5)]
         [int]
-        $ErrorThreshold = 1
+        $ErrorThreshold = 1,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [switch]
+        $ValidateDoesNotExist
     )
 
     Process
     {
-	    $parameters = @()
-        $parameters += "instance_=1"
-        $parameters += "instance__check=$IISWebsite"
+	    $validationParameters = @()
+        $validationParameters += "filter_parentid=$ParentId"
+        $validationParameters += 'filter_type=pciisapppool'
+        $validateName = $IISWebsite.Split('|')[1]
 
-        New-PrtgSensor -ParentId $ParentId -SensorType pciisapppool -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -ErrorThreshold $ErrorThreshold -OtherParameters $parameters
+        $otherParameters = @()
+        $otherParameters += "instance_=1"
+        $otherParameters += "instance__check=$IISWebsite"
+
+        $parameters = @{}
+        $parameters.ParentId = $ParentId
+        $parameters.SensorType = 'pciisapppool'
+        $parameters.Priority = $Priority
+        $parameters.Tags = $Tags
+        $parameters.RefreshInterval = $RefreshInterval
+        $parameters.ErrorThreshold = $ErrorThreshold
+        $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
+        $parameters.ValidationParameters = $validationParameters
+        $parameters.ValidateName = $validateName
+        $parameters.OtherParameters = $otherParameters
+
+        New-PrtgSensor @parameters
     }
 }
 
@@ -1194,7 +1460,7 @@ function New-PrtgSensorOracleSql
 
         [Parameter(ValueFromPipelineByPropertyName)]
         [string]
-        $Name = 'Oracle SQL',
+        $Name = "Oracle SQL - $SqlQueryFile",
 
         [Parameter(ValueFromPipelineByPropertyName)]
         [string]
@@ -1232,29 +1498,50 @@ function New-PrtgSensorOracleSql
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateRange(0,5)]
         [int]
-        $ErrorThreshold = 1
+        $ErrorThreshold = 1,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [switch]
+        $ValidateDoesNotExist
     )
 
     Process
     {
-	    $parameters = @()
-        $parameters += "sqlquery_=$SqlQueryFile|$SqlQueryFile||"
-        $parameters += "database_=$Identifier"
-        $parameters += "sid_type_=$([int]($IdentifierType -ne 'SID'))"
-        $parameters += "transaction_=$Transaction"
-        $parameters += "executionmode_=$ExecutionMode"
-        $parameters += "channel1valuelookup_=|None"
-        $parameters += "channel2valuelookup_=|None"
-        $parameters += "channel3valuelookup_=|None"
-        $parameters += "channel4valuelookup_=|None"
-        $parameters += "channel5valuelookup_=|None"
-        $parameters += "channel6valuelookup_=|None"
-        $parameters += "channel7valuelookup_=|None"
-        $parameters += "channel8valuelookup_=|None"
-        $parameters += "channel9valuelookup_=|None"
-        $parameters += "channel10valuelookup_=|None"
-        
-        New-PrtgSensor -ParentId $ParentId -SensorType oraclev2 -Name $Name -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -ErrorThreshold $ErrorThreshold -OtherParameters $parameters
+	    $validationParameters = @()
+        $validationParameters += "filter_parentid=$ParentId"
+        $validationParameters += 'filter_type=oraclev2'
+        $validationParameters += "filter_name=$Name"
+
+        $otherParameters = @()
+        $otherParameters += "sqlquery_=$SqlQueryFile|$SqlQueryFile||"
+        $otherParameters += "database_=$Identifier"
+        $otherParameters += "sid_type_=$([int]($IdentifierType -ne 'SID'))"
+        $otherParameters += "transaction_=$Transaction"
+        $otherParameters += "executionmode_=$ExecutionMode"
+        $otherParameters += "channel1valuelookup_=|None"
+        $otherParameters += "channel2valuelookup_=|None"
+        $otherParameters += "channel3valuelookup_=|None"
+        $otherParameters += "channel4valuelookup_=|None"
+        $otherParameters += "channel5valuelookup_=|None"
+        $otherParameters += "channel6valuelookup_=|None"
+        $otherParameters += "channel7valuelookup_=|None"
+        $otherParameters += "channel8valuelookup_=|None"
+        $otherParameters += "channel9valuelookup_=|None"
+        $otherParameters += "channel10valuelookup_=|None"
+
+        $parameters = @{}
+        $parameters.ParentId = $ParentId
+        $parameters.SensorType = 'oraclev2'
+        $parameters.Name = $Name
+        $parameters.Priority = $Priority
+        $parameters.Tags = $Tags
+        $parameters.RefreshInterval = $RefreshInterval
+        $parameters.ErrorThreshold = $ErrorThreshold
+        $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
+        $parameters.ValidationParameters = $validationParameters
+        $parameters.OtherParameters = $otherParameters
+                
+        New-PrtgSensor @parameters
     }
 }
 
@@ -1305,18 +1592,38 @@ function New-PrtgSensorPing
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateRange(0,5)]
         [int]
-        $ErrorThreshold = 1
+        $ErrorThreshold = 1,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [switch]
+        $ValidateDoesNotExist
     )
 
     Process
     {
-        $parameters = @()
-        $parameters += "timeout_=$Timeout"
-        $parameters += "size_=$Size"
-        $parameters += "count_=$Count"
-        $parameters += "delay_=$Delay"
+        $validationParameters = @()
+        $validationParameters += "filter_parentid=$ParentId"
+        $validationParameters += 'filter_type=ping'
 
-	    New-PrtgSensor -ParentId $ParentId -SensorType ping -Name $Name -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -ErrorThreshold $ErrorThreshold -OtherParameters $parameters
+        $otherParameters = @()
+        $otherParameters += "timeout_=$Timeout"
+        $otherParameters += "size_=$Size"
+        $otherParameters += "count_=$Count"
+        $otherParameters += "delay_=$Delay"
+
+        $parameters = @{}
+        $parameters.ParentId = $ParentId
+        $parameters.SensorType = 'ping'
+        $parameters.Name = $Name
+        $parameters.Priority = $Priority
+        $parameters.Tags = $Tags
+        $parameters.RefreshInterval = $RefreshInterval
+        $parameters.ErrorThreshold = $ErrorThreshold
+        $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
+        $parameters.ValidationParameters = $validationParameters
+        $parameters.OtherParameters = $otherParameters
+
+	    New-PrtgSensor @parameters
     }
 }
 
@@ -1359,16 +1666,36 @@ function New-PrtgSensorRdp
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateRange(0,5)]
         [int]
-        $ErrorThreshold = 1
+        $ErrorThreshold = 1,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [switch]
+        $ValidateDoesNotExist
     )
 
     Process
     {
-        $parameters = @()
-        $parameters += "timeout_=$Timeout"
-        $parameters += "port_=$RDPPort"
+        $validationParameters = @()
+        $validationParameters += "filter_parentid=$ParentId"
+        $validationParameters += 'filter_type=remotedesktop'
 
-	    New-PrtgSensor -ParentId $ParentId -SensorType remotedesktop -Name $Name -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -ErrorThreshold $ErrorThreshold -OtherParameters $parameters
+        $otherParameters = @()
+        $otherParameters += "timeout_=$Timeout"
+        $otherParameters += "port_=$RDPPort"
+
+        $parameters = @{}
+        $parameters.ParentId = $ParentId
+        $parameters.SensorType = 'remotedesktop'
+        $parameters.Name = $Name
+        $parameters.Priority = $Priority
+        $parameters.Tags = $Tags
+        $parameters.RefreshInterval = $RefreshInterval
+        $parameters.ErrorThreshold = $ErrorThreshold
+        $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
+        $parameters.ValidationParameters = $validationParameters
+        $parameters.OtherParameters = $otherParameters
+
+	    New-PrtgSensor @parameters
     }
 }
 
@@ -1403,12 +1730,31 @@ function New-PrtgSensorCpuLoad
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateRange(0,5)]
         [int]
-        $ErrorThreshold = 1
+        $ErrorThreshold = 1,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [switch]
+        $ValidateDoesNotExist
     )
 
     Process
     {
-        New-PrtgSensor -ParentId $ParentId -SensorType snmpcpu -Name $Name -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -ErrorThreshold $ErrorThreshold
+        $validationParameters = @()
+        $validationParameters += "filter_parentid=$ParentId"
+        $validationParameters += 'filter_type=snmpcpu'
+
+        $parameters = @{}
+        $parameters.ParentId = $ParentId
+        $parameters.SensorType = 'snmpcpu'
+        $parameters.Name = $Name
+        $parameters.Priority = $Priority
+        $parameters.Tags = $Tags
+        $parameters.RefreshInterval = $RefreshInterval
+        $parameters.ErrorThreshold = $ErrorThreshold
+        $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
+        $parameters.ValidationParameters = $validationParameters
+        
+        New-PrtgSensor @parameters
     }
 }
 
@@ -1443,12 +1789,31 @@ function New-PrtgSensorSystemUptime
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateRange(0,5)]
         [int]
-        $ErrorThreshold = 1
+        $ErrorThreshold = 1,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [switch]
+        $ValidateDoesNotExist
     )
 
     Process
     {
-        New-PrtgSensor -ParentId $ParentId -SensorType snmpuptime -Name $Name -Priority $Priority -Tags $Tags -RefreshInterval $RefreshInterval -ErrorThreshold $ErrorThreshold
+        $validationParameters = @()
+        $validationParameters += "filter_parentid=$ParentId"
+        $validationParameters += 'filter_type=snmpuptime'
+
+        $parameters = @{}
+        $parameters.ParentId = $ParentId
+        $parameters.SensorType = 'snmpuptime'
+        $parameters.Name = $Name
+        $parameters.Priority = $Priority
+        $parameters.Tags = $Tags
+        $parameters.RefreshInterval = $RefreshInterval
+        $parameters.ErrorThreshold = $ErrorThreshold
+        $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
+        $parameters.ValidationParameters = $validationParameters
+
+        New-PrtgSensor @parameters
     }
 }
 
@@ -1490,12 +1855,35 @@ function New-PrtgSensor
         $ErrorThreshold,
 
         [Parameter(ValueFromPipelineByPropertyName)]
+        [switch]
+        $ValidateDoesNotExist,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string[]]
+        $ValidationParameters,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string]
+        $ValidateName,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
         [string[]]
         $OtherParameters
     )
 
     Process
     {
+        if ($ValidateDoesNotExist)
+        {
+            $xml = ([xml](Get-PrtgTable -Content sensors -OtherParameters $ValidationParameters).Content).Sensors
+            
+            if ($xml.TotalCount -gt 0 -and (-not $ValidateName -or ($ValidateName -and ($xml.Item | Where-Object Sensor -match $ValidateName)))
+            {
+                Write-Verbose "Sensor already exists, skipping it"
+                return
+            }
+        }
+                
         $parameters = @()
         
         $parameters += "name_=$Name"
@@ -1529,7 +1917,12 @@ function New-PrtgSensor
 
         $result = (Invoke-PrtgCommand -CommandPath addsensor5.htm -Parameters $parameters).Content
 
-        [regex]::Match($result, "<title>.*</title>", "IgnoreCase").Value -notmatch "System Error"
+        $success = [regex]::Match($result, "<title>.*</title>", "IgnoreCase").Value -notmatch "System Error"
+
+        if (!$success)
+        {
+            $PSCmdlet.ThrowTerminatingError((New-ErrorRecord "Failed to create sensor with sensor type $SensorType on object id $ParentId"))
+        }
     }
 }
 
@@ -1671,7 +2064,7 @@ function Get-PrtgSensorValidValues
 
     Process
     {
-        $result = Invoke-PrtgCommand -CommandPath controls/addsensor2.htm -Id $DeviceId -Parameters "sensortype=$SensorType" -DoNotUseBasicParsing
+        $result = Invoke-PrtgCommand -CommandPath controls/addsensor2.htm -Id $DeviceId -Parameters "sensortype=$SensorType"
         
         $tmpid = (($result.BaseResponse.ResponseUri.ToString() -split 'tmpid=')[1] -split '&')[0]
         
@@ -1742,11 +2135,9 @@ function Get-PrtgSensorValidValues
             }
         }
 
-        $regex = ([regex]::Matches($result.Content, "<[^<]+$elementName((?!\/?>).)*").Value | ForEach-Object {[xml] ($_ + "/>")}).Input.Value
+        $regMatches = ([regex]::Matches($result.Content, "<[^<]+$elementName((?!\/?>).)*").Value | ForEach-Object {[xml] ($_ + "/>")}).Input.Value
 
-        $regex | ForEach-Object {
-            [PSCustomObject] @{'ParentId' = $DeviceId; 'Name' = $_.Split('|')[$index]; $elementName = $_}
-	    }
+        $regMatches | ForEach-Object {[PSCustomObject] @{'ParentId' = $DeviceId; 'Name' = $_.Split('|')[$index]; $elementName = $_}}
     }
 }
 
