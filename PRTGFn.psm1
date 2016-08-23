@@ -641,11 +641,6 @@ function New-PrtgSensorSnmpTraffic
     )
     Process
     {
-        $validationParameters = @()
-        $validationParameters += "filter_parentid=$ParentId"
-        $validationParameters += 'filter_type=snmptraffic'
-        $validateName = $Interface.Split('|')[6]
-
         $otherParameters = @()
         $otherParameters += "interfacenumber_=1"
         $otherParameters += "interfacenumber__check=$Interface"
@@ -663,8 +658,7 @@ function New-PrtgSensorSnmpTraffic
         $parameters.RefreshInterval = $RefreshInterval
         $parameters.ErrorThreshold = $ErrorThreshold
         $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
-        $parameters.ValidationParameters = $validationParameters
-        $parameters.ValidateName = $validateName
+        $parameters.ValidateName = $Interface.Split('|')[6]
         $parameters.OtherParameters = $otherParameters
         
         New-PrtgSensor @parameters
@@ -711,11 +705,6 @@ function New-PrtgSensorSnmpDiskFree
     )
     Process
     {
-        $validationParameters = @()
-        $validationParameters += "filter_parentid=$ParentId"
-        $validationParameters += 'filter_type=snmpdiskfree'
-        $validateName = $Disk.Split('|')[1]
-
         $otherParameters = @()
 	    $otherParameters += "disk_=1"
         $otherParameters += "disk__check=$Disk"
@@ -728,8 +717,7 @@ function New-PrtgSensorSnmpDiskFree
         $parameters.RefreshInterval = $RefreshInterval
         $parameters.ErrorThreshold = $ErrorThreshold
         $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
-        $parameters.ValidationParameters = $validationParameters
-        $parameters.ValidateName = $validateName
+        $parameters.ValidateName = $Disk.Split('|')[1].Replace('  ', ' ')
         $parameters.OtherParameters = $otherParameters
         
         New-PrtgSensor @parameters
@@ -777,11 +765,6 @@ function New-PrtgSensorSnmpMemory
 
     Process
     {
-        $validationParameters = @()
-        $validationParameters += "filter_parentid=$ParentId"
-        $validationParameters += 'filter_type=snmpmemory'
-        $validateName = $Memory.Split('|')[1]
-
         $otherParameters = @()
         $otherParameters += "memory_=1"
         $otherParameters += "memory__check=$Memory"
@@ -794,8 +777,7 @@ function New-PrtgSensorSnmpMemory
         $parameters.RefreshInterval = $RefreshInterval
         $parameters.ErrorThreshold = $ErrorThreshold
         $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
-        $parameters.ValidationParameters = $validationParameters
-        $parameters.ValidateName = $validateName
+        $parameters.ValidateName = $Memory.Split('|')[1]
         $parameters.OtherParameters = $otherParameters
         
         New-PrtgSensor @parameters
@@ -843,10 +825,8 @@ function New-PrtgSensorSnmpNetAppEnclosure
 
     Process
     {
-	    $validationParameters = @()
-        $validationParameters += "filter_parentid=$ParentId"
-        $validationParameters += 'filter_type=snmpnetappenclosurestatus'
-        $validateName = $Enclosure.Split('|')[4]
+        $split = $Enclosure.Split('|')
+        $validateName = "$($split[4]).*$($split[0])"
 
         $otherParameters = @()
         $otherParameters += "enclosure_=1"
@@ -860,7 +840,6 @@ function New-PrtgSensorSnmpNetAppEnclosure
         $parameters.RefreshInterval = $RefreshInterval
         $parameters.ErrorThreshold = $ErrorThreshold
         $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
-        $parameters.ValidationParameters = $validationParameters
         $parameters.ValidateName = $validateName
         $parameters.OtherParameters = $otherParameters
         
@@ -909,11 +888,6 @@ function New-PrtgSensorSnmpNetAppLogicalUnit
 
     Process
     {
-	    $validationParameters = @()
-        $validationParameters += "filter_parentid=$ParentId"
-        $validationParameters += 'filter_type=snmpnetapplun'
-        $validateName = $LogicalUnit.Split('|')[0]
-
         $otherParameters = @()
         $otherParameters += "lun_=1"
         $otherParameters += "lun__check=$LogicalUnit"
@@ -927,7 +901,7 @@ function New-PrtgSensorSnmpNetAppLogicalUnit
         $parameters.ErrorThreshold = $ErrorThreshold
         $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
         $parameters.ValidationParameters = $validationParameters
-        $parameters.ValidateName = $validateName
+        $parameters.ValidateName = $LogicalUnit.Split('|')[0]
         $parameters.OtherParameters = $otherParameters
         
         New-PrtgSensor @parameters
@@ -975,11 +949,6 @@ function New-PrtgSensorSnmpNetAppNetworkInterface
 
     Process
     {
-	    $validationParameters = @()
-        $validationParameters += "filter_parentid=$ParentId"
-        $validationParameters += 'filter_type=snmpnetappnetworkinterface'
-        $validateName = $Interface.Split('|')[0]
-
         $otherParameters = @()
         $otherParameters += "interface_=1"
         $otherParameters += "interface__check=$Interface"
@@ -992,8 +961,7 @@ function New-PrtgSensorSnmpNetAppNetworkInterface
         $parameters.RefreshInterval = $RefreshInterval
         $parameters.ErrorThreshold = $ErrorThreshold
         $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
-        $parameters.ValidationParameters = $validationParameters
-        $parameters.ValidateName = $validateName
+        $parameters.ValidateName = $Interface.Split('|')[0]
         $parameters.OtherParameters = $otherParameters
         
         New-PrtgSensor @parameters
@@ -1041,11 +1009,6 @@ function New-PrtgSensorSnmpNetAppDiskFree
 
     Process
     {
-	    $validationParameters = @()
-        $validationParameters += "filter_parentid=$ParentId"
-        $validationParameters += 'filter_type=snmpnetappdiskfree'
-        $validateName = $Disk.Split('|')[0]
-
         $otherParameters = @()
         $otherParameters += "filesystem_=1"
         $otherParameters += "filesystem__check=$Disk"
@@ -1058,8 +1021,7 @@ function New-PrtgSensorSnmpNetAppDiskFree
         $parameters.RefreshInterval = $RefreshInterval
         $parameters.ErrorThreshold = $ErrorThreshold
         $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
-        $parameters.ValidationParameters = $validationParameters
-        $parameters.ValidateName = $validateName
+        $parameters.ValidateName = $Disk.Split('|')[0]
         $parameters.OtherParameters = $otherParameters
         
         New-PrtgSensor @parameters
@@ -1106,10 +1068,6 @@ function New-PrtgSensorSnmpNetAppIO
 
     Process
     {
-	    $validationParameters = @()
-        $validationParameters += "filter_parentid=$ParentId"
-        $validationParameters += 'filter_type=snmpnetappio'
-
         $parameters = @{}
         $parameters.ParentId = $ParentId
         $parameters.SensorType = 'snmpnetappio'
@@ -1118,7 +1076,6 @@ function New-PrtgSensorSnmpNetAppIO
         $parameters.Tags = $Tags
         $parameters.RefreshInterval = $RefreshInterval
         $parameters.ErrorThreshold = $ErrorThreshold
-        $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
         $parameters.ValidationParameters = $validationParameters
         
         New-PrtgSensor @parameters
@@ -1165,10 +1122,6 @@ function New-PrtgSensorSnmpNetAppSystemHealth
 
     Process
     {
-	    $validationParameters = @()
-        $validationParameters += "filter_parentid=$ParentId"
-        $validationParameters += 'filter_type=snmpnetappsystemhealth'
-
         $parameters = @{}
         $parameters.ParentId = $ParentId
         $parameters.SensorType = 'snmpnetappsystemhealth'
@@ -1177,7 +1130,6 @@ function New-PrtgSensorSnmpNetAppSystemHealth
         $parameters.Tags = $Tags
         $parameters.RefreshInterval = $RefreshInterval
         $parameters.ErrorThreshold = $ErrorThreshold
-        $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
         $parameters.ValidationParameters = $validationParameters
         
         New-PrtgSensor @parameters
@@ -1224,10 +1176,6 @@ function New-PrtgSensorSnmpHpSystemHealth
 
     Process
     {
-	    $validationParameters = @()
-        $validationParameters += "filter_parentid=$ParentId"
-        $validationParameters += 'filter_type=snmphpsystemhealth'
-
         $parameters = @{}
         $parameters.ParentId = $ParentId
         $parameters.SensorType = 'snmphpsystemhealth'
@@ -1236,7 +1184,6 @@ function New-PrtgSensorSnmpHpSystemHealth
         $parameters.Tags = $Tags
         $parameters.RefreshInterval = $RefreshInterval
         $parameters.ErrorThreshold = $ErrorThreshold
-        $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
         $parameters.ValidationParameters = $validationParameters
         
         New-PrtgSensor @parameters
@@ -1284,11 +1231,6 @@ function New-PrtgSensorVmwareDatastore
 
     Process
     {
-	    $validationParameters = @()
-        $validationParameters += "filter_parentid=$ParentId"
-        $validationParameters += 'filter_type=vmwaredatastoreextern'
-        $validateName = $Datastore.Split('|')[1]
-
         $otherParameters = @()
         $otherParameters += "datafieldlist_=1"
         $otherParameters += "datafieldlist__check=$Datastore"
@@ -1301,8 +1243,7 @@ function New-PrtgSensorVmwareDatastore
         $parameters.RefreshInterval = $RefreshInterval
         $parameters.ErrorThreshold = $ErrorThreshold
         $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
-        $parameters.ValidationParameters = $validationParameters
-        $parameters.ValidateName = $validateName
+        $parameters.ValidateName = $Datastore.Split('|')[1]
         $parameters.OtherParameters = $otherParameters
         
         New-PrtgSensor @parameters
@@ -1354,10 +1295,6 @@ function New-PrtgSensorVmwareServerHostHealth
 
     Process
     {
-	    $validationParameters = @()
-        $validationParameters += "filter_parentid=$ParentId"
-        $validationParameters += 'filter_type=esxserverhealthsensorextern'
-
         $otherParameters = @()
         $otherParameters += "datafieldlist_=1"
         $otherParameters += "datafieldlist__check=$Host"
@@ -1371,7 +1308,67 @@ function New-PrtgSensorVmwareServerHostHealth
         $parameters.RefreshInterval = $RefreshInterval
         $parameters.ErrorThreshold = $ErrorThreshold
         $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
-        $parameters.ValidationParameters = $validationParameters
+        $parameters.OtherParameters = $otherParameters
+        
+        New-PrtgSensor @parameters
+    }
+}
+
+function New-PrtgSensorVmwareHostPerformance
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+        [Alias('Id')]
+        [int]
+        $ParentId,
+        
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [Alias('datafieldlist__check')]
+        [string]
+        $Host,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string[]]
+        $Tags = @("Prtg_$Version", 'esxserverhostsensor'),
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(1,5)]
+        [int]
+        $Priority = 3,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
+        [int]
+        $RefreshInterval = 0,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(0,5)]
+        [int]
+        $ErrorThreshold = 1,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [switch]
+        $ValidateDoesNotExist
+    )
+
+    Process
+    {
+        $otherParameters = @()
+        $otherParameters += "datafieldlist_=1"
+        $otherParameters += "datafieldlist__check=$Host"
+
+        $parameters = @{}
+        $parameters.ParentId = $ParentId
+        $parameters.SensorType = 'esxserversensorextern'
+        $parameters.Name = $Name
+        $parameters.Priority = $Priority
+        $parameters.Tags = $Tags
+        $parameters.RefreshInterval = $RefreshInterval
+        $parameters.ErrorThreshold = $ErrorThreshold
+        $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
+        $parameters.ValidateName = $Host.Split('|')[1]
         $parameters.OtherParameters = $otherParameters
         
         New-PrtgSensor @parameters
@@ -1419,11 +1416,6 @@ function New-PrtgSensorPerfCounterIISApplicationPool
 
     Process
     {
-	    $validationParameters = @()
-        $validationParameters += "filter_parentid=$ParentId"
-        $validationParameters += 'filter_type=pciisapppool'
-        $validateName = $IISWebsite.Split('|')[1]
-
         $otherParameters = @()
         $otherParameters += "instance_=1"
         $otherParameters += "instance__check=$IISWebsite"
@@ -1436,8 +1428,7 @@ function New-PrtgSensorPerfCounterIISApplicationPool
         $parameters.RefreshInterval = $RefreshInterval
         $parameters.ErrorThreshold = $ErrorThreshold
         $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
-        $parameters.ValidationParameters = $validationParameters
-        $parameters.ValidateName = $validateName
+        $parameters.ValidateName = $IISWebsite.Split('|')[1]
         $parameters.OtherParameters = $otherParameters
 
         New-PrtgSensor @parameters
@@ -1507,11 +1498,6 @@ function New-PrtgSensorOracleSql
 
     Process
     {
-	    $validationParameters = @()
-        $validationParameters += "filter_parentid=$ParentId"
-        $validationParameters += 'filter_type=oraclev2'
-        $validationParameters += "filter_name=$Name"
-
         $otherParameters = @()
         $otherParameters += "sqlquery_=$SqlQueryFile|$SqlQueryFile||"
         $otherParameters += "database_=$Identifier"
@@ -1538,14 +1524,13 @@ function New-PrtgSensorOracleSql
         $parameters.RefreshInterval = $RefreshInterval
         $parameters.ErrorThreshold = $ErrorThreshold
         $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
-        $parameters.ValidationParameters = $validationParameters
         $parameters.OtherParameters = $otherParameters
                 
         New-PrtgSensor @parameters
     }
 }
 
-function New-PrtgSensorPing
+function New-PrtgSensorMsSql
 {
     [CmdletBinding()]
     param
@@ -1554,35 +1539,46 @@ function New-PrtgSensorPing
         [Alias('Id')]
         [int]
         $ParentId,
+        
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [string]
+        $Database,
+
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [string]
+        $SqlQueryFile,
 
         [Parameter(ValueFromPipelineByPropertyName)]
         [string]
-        $Name = 'Ping',
+        $Name = "MS SQL - $SqlQueryFile",
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string]
+        $InstanceName,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateSet('UseServerDefaults', 'EnforceEncryptionDoNotValidateCertificate', 'EnforceEncryptionValidateCertificate')]
+        [string]
+        $Encryption = 'UseServerDefaults',
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateSet('NoTransaction', 'Rollback', 'Commit')]
+        [string]
+        $Transaction = 'NoTransaction',
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateSet('ChangeDB', 'CountRows', 'ReadData')]
+        [string]
+        $ExecutionMode = 'ChangeDB',
 
         [Parameter(ValueFromPipelineByPropertyName)]
         [string[]]
-        $Tags = @("Prtg_$Version", "pingsensor"),
+        $Tags = @("Prtg_$Version", 'sqlsensor'),
 
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateRange(1,5)]
         [int]
         $Priority = 3,
-
-        [Parameter(ValueFromPipelineByPropertyName)]
-        [int]
-        $Timeout = 5,
-
-        [Parameter(ValueFromPipelineByPropertyName)]
-        [int]
-        $Size = 32,
-
-        [Parameter(ValueFromPipelineByPropertyName)]
-        [int]
-        $Count = 5,
-
-        [Parameter(ValueFromPipelineByPropertyName)]
-        [int]
-        $Delay = 5,
 
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
@@ -1601,10 +1597,444 @@ function New-PrtgSensorPing
 
     Process
     {
-        $validationParameters = @()
-        $validationParameters += "filter_parentid=$ParentId"
-        $validationParameters += 'filter_type=ping'
+        $otherParameters = @()
+        $otherParameters += "sqlquery_=$SqlQueryFile|$SqlQueryFile||"
+        $otherParameters += "database_=$Database"
+        $otherParameters += "useinstancename_=$([int] -not [string]::IsNullOrEmpty($InstanceName))"
+        $otherParameters += "instancename_=$InstanceName" # If useinstancename_ is 0, then this will be ignored by PRTG
 
+        $otherParameters += switch ($Encryption)
+        {
+            'UseServerDefaults' {'enforceencryption_=0'}
+            'EnforceEncryptionDoNotValidateCertificate' {'enforceencryption_=2'}
+            'EnforceEncryptionValidateCertificate' {'enforceencryption_=1'}
+        }
+
+        $otherParameters += "transaction_=$Transaction"
+        $otherParameters += "executionmode_=$ExecutionMode"
+        $otherParameters += "channel1valuelookup_=|None"
+        $otherParameters += "channel2valuelookup_=|None"
+        $otherParameters += "channel3valuelookup_=|None"
+        $otherParameters += "channel4valuelookup_=|None"
+        $otherParameters += "channel5valuelookup_=|None"
+        $otherParameters += "channel6valuelookup_=|None"
+        $otherParameters += "channel7valuelookup_=|None"
+        $otherParameters += "channel8valuelookup_=|None"
+        $otherParameters += "channel9valuelookup_=|None"
+        $otherParameters += "channel10valuelookup_=|None"
+
+        $parameters = @{}
+        $parameters.ParentId = $ParentId
+        $parameters.SensorType = 'mssqlv2'
+        $parameters.Name = $Name
+        $parameters.Priority = $Priority
+        $parameters.Tags = $Tags
+        $parameters.RefreshInterval = $RefreshInterval
+        $parameters.ErrorThreshold = $ErrorThreshold
+        $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
+        $parameters.OtherParameters = $otherParameters
+                
+        New-PrtgSensor @parameters
+    }
+}
+
+function New-PrtgSensorHttp
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+        [Alias('Id')]
+        [int]
+        $ParentId,
+
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [string]
+        $Url,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string]
+        $Name = "HTTP - $Url",
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [int]
+        $Timeout = 60,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string[]]
+        $Tags = @("Prtg_$Version", "httpsensor"),
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(1,5)]
+        [int]
+        $Priority = 3,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
+        [int]
+        $RefreshInterval = 0,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(0,5)]
+        [int]
+        $ErrorThreshold = 1,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [switch]
+        $ValidateDoesNotExist
+    )
+
+    Process
+    {
+        $otherParameters = @()
+        $otherParameters += "timeout_=$Timeout"
+
+        $parameters = @{}
+        $parameters.ParentId = $ParentId
+        $parameters.SensorType = 'http'
+        $parameters.Name = $Name
+        $parameters.Priority = $Priority
+        $parameters.Tags = $Tags
+        $parameters.RefreshInterval = $RefreshInterval
+        $parameters.ErrorThreshold = $ErrorThreshold
+        $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
+        $parameters.OtherParameters = $otherParameters
+
+	    New-PrtgSensor @parameters
+    }
+}
+
+function New-PrtgSensorDns
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+        [Alias('Id')]
+        [int]
+        $ParentId,
+
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [string]
+        $DnsDomain,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string]
+        $Name = "DNS - $DnsDomain",
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [int]
+        $Timeout = 5,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [int]
+        $Port = 53,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string[]]
+        $Tags = @("Prtg_$Version", "dnssensor"),
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(1,5)]
+        [int]
+        $Priority = 3,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
+        [int]
+        $RefreshInterval = 0,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(0,5)]
+        [int]
+        $ErrorThreshold = 1,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [switch]
+        $ValidateDoesNotExist
+    )
+
+    Process
+    {
+        $otherParameters = @()
+        $otherParameters += "timeout_=$Timeout"
+        $otherParameters += "port_=$Port"
+
+        $parameters = @{}
+        $parameters.ParentId = $ParentId
+        $parameters.SensorType = 'dns'
+        $parameters.Name = $Name
+        $parameters.Priority = $Priority
+        $parameters.Tags = $Tags
+        $parameters.RefreshInterval = $RefreshInterval
+        $parameters.ErrorThreshold = $ErrorThreshold
+        $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
+        $parameters.OtherParameters = $otherParameters
+
+	    New-PrtgSensor @parameters
+    }
+}
+
+function New-PrtgSensorFolder
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+        [Alias('Id')]
+        [int]
+        $ParentId,
+
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [string]
+        $FolderName,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string]
+        $Name = "Folder - $FolderName",
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [switch]
+        $Recurse,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [switch]
+        $TriggerOnChangeNotification,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateSet('DoNotCheck', 'WarningIfOlder', 'ErrorIfOlder', 'WarningIfYounger', 'ErrorIfYounger')]
+        [string]
+        $FileAge = 'DoNotCheck',
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [int]
+        $FileAgeLimit,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateSet('Days', 'Hours', 'Minutes')]
+        [string]
+        $FileAgeLimitUnit,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string[]]
+        $Tags = @("Prtg_$Version", "foldersensor"),
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(1,5)]
+        [int]
+        $Priority = 3,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
+        [int]
+        $RefreshInterval = 0,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(0,5)]
+        [int]
+        $ErrorThreshold = 1,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [switch]
+        $ValidateDoesNotExist
+    )
+
+    Process
+    {        
+        $otherParameters = @()
+        $otherParameters += "foldername_=$FolderName"
+        $otherParameters += "recurse_=$([int]$Recurse.IsPresent)"
+        $otherParameters += "monitorcontent_=$([int]$TriggerOnChangeNotification.IsPresent)"
+        $otherParameters += switch ($FileAge)
+        {
+            'DoNotCheck' {'checkfileage_=0'}
+            'WarningIfOlder' {'checkfileage_=1'}
+            'ErrorIfOlder' {'checkfileage_=2'}
+            'WarningIfYounger' {'checkfileage_=3'}
+            'ErrorIfYounger' {'checkfileage_=4'}
+        }
+        $otherParameters += "fileage_=$FileAgeLimit"
+        $otherParameters += switch ($FileAgeLimitUnit)
+        {
+            'Days' {'timeframe_=0'}
+            'Hours' {'timeframe_=1'}
+            'Minutes' {'timeframe_=2'}
+        }
+
+        $parameters = @{}
+        $parameters.ParentId = $ParentId
+        $parameters.SensorType = 'folder'
+        $parameters.Name = $Name
+        $parameters.Priority = $Priority
+        $parameters.Tags = $Tags
+        $parameters.RefreshInterval = $RefreshInterval
+        $parameters.ErrorThreshold = $ErrorThreshold
+        $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
+        $parameters.OtherParameters = $otherParameters
+
+	    New-PrtgSensor @parameters
+    }
+}
+
+function New-PrtgSensorFileContent
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+        [Alias('Id')]
+        [int]
+        $ParentId,
+
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [string]
+        $FileName,
+
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [string]
+        $Search,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string]
+        $Name = "Folder - $FileName",
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [switch]
+        $TransmitEntireFile,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [switch]
+        $UseRegex,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateSet('Windows-1252', 'UTF-8', 'UTF-16')]
+        [string]
+        $Encoding = 'Windows-1252',
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateSet('WarningWhenNotFound', 'WarningWhenFound')]
+        [string]
+        $WarningBehaviour = 'WarningWhenNotFound',
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [switch]
+        $TriggerOnChangeNotification,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string[]]
+        $Tags = @("Prtg_$Version", "filesensor"),
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(1,5)]
+        [int]
+        $Priority = 3,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
+        [int]
+        $RefreshInterval = 0,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(0,5)]
+        [int]
+        $ErrorThreshold = 1,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [switch]
+        $ValidateDoesNotExist
+    )
+
+    Process
+    {
+        $otherParameters = @()
+        $otherParameters += "filename_=$FileName"
+        $otherParameters += "searchstring_=$Search"
+        $otherParameters += "readbehaviour_=$([int] -not $TransmitEntireFile.IsPresent)"
+        $otherParameters += "useregexp_=$([int] $UseRegex.IsPresent)"
+        $otherParameters += switch ($Encoding)
+        {
+            'Windows-1252' {'fileencoding_=0'}
+            'UTF-8' {'fileencoding_=1'}
+            'UTF-16' {'fileencoding_=2'}
+        }
+        $otherParameters += switch ($WarningBehaviour)
+        {
+            'WarningWhenNotFound' {'warningbehaviour_=0'}
+            'WarningWhenFound' {'warningbehaviour_=1'}
+        }
+        $otherParameters += "monitorchange_=$([int]$TriggerOnChangeNotification.IsPresent)"
+
+        $parameters = @{}
+        $parameters.ParentId = $ParentId
+        $parameters.SensorType = 'filecontent'
+        $parameters.Name = $Name
+        $parameters.Priority = $Priority
+        $parameters.Tags = $Tags
+        $parameters.RefreshInterval = $RefreshInterval
+        $parameters.ErrorThreshold = $ErrorThreshold
+        $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
+        $parameters.OtherParameters = $otherParameters
+
+	    New-PrtgSensor @parameters
+    }
+}
+
+function New-PrtgSensorPing
+{
+    [CmdletBinding()]
+    param
+    (
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+        [Alias('Id')]
+        [int]
+        $ParentId,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string]
+        $Name = 'Ping',
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [int]
+        $Timeout = 5,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [int]
+        $Size = 32,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [int]
+        $Count = 5,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [int]
+        $Delay = 5,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string[]]
+        $Tags = @("Prtg_$Version", "pingsensor"),
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(1,5)]
+        [int]
+        $Priority = 3,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateSet(0, 30, 60, 300, 600, 900, 1800, 3600, 14400, 21600, 43200, 86400)]
+        [int]
+        $RefreshInterval = 0,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(0,5)]
+        [int]
+        $ErrorThreshold = 1,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [switch]
+        $ValidateDoesNotExist
+    )
+
+    Process
+    {
         $otherParameters = @()
         $otherParameters += "timeout_=$Timeout"
         $otherParameters += "size_=$Size"
@@ -1620,7 +2050,6 @@ function New-PrtgSensorPing
         $parameters.RefreshInterval = $RefreshInterval
         $parameters.ErrorThreshold = $ErrorThreshold
         $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
-        $parameters.ValidationParameters = $validationParameters
         $parameters.OtherParameters = $otherParameters
 
 	    New-PrtgSensor @parameters
@@ -1675,10 +2104,6 @@ function New-PrtgSensorRdp
 
     Process
     {
-        $validationParameters = @()
-        $validationParameters += "filter_parentid=$ParentId"
-        $validationParameters += 'filter_type=remotedesktop'
-
         $otherParameters = @()
         $otherParameters += "timeout_=$Timeout"
         $otherParameters += "port_=$RDPPort"
@@ -1692,7 +2117,6 @@ function New-PrtgSensorRdp
         $parameters.RefreshInterval = $RefreshInterval
         $parameters.ErrorThreshold = $ErrorThreshold
         $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
-        $parameters.ValidationParameters = $validationParameters
         $parameters.OtherParameters = $otherParameters
 
 	    New-PrtgSensor @parameters
@@ -1739,10 +2163,6 @@ function New-PrtgSensorCpuLoad
 
     Process
     {
-        $validationParameters = @()
-        $validationParameters += "filter_parentid=$ParentId"
-        $validationParameters += 'filter_type=snmpcpu'
-
         $parameters = @{}
         $parameters.ParentId = $ParentId
         $parameters.SensorType = 'snmpcpu'
@@ -1752,7 +2172,6 @@ function New-PrtgSensorCpuLoad
         $parameters.RefreshInterval = $RefreshInterval
         $parameters.ErrorThreshold = $ErrorThreshold
         $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
-        $parameters.ValidationParameters = $validationParameters
         
         New-PrtgSensor @parameters
     }
@@ -1798,10 +2217,6 @@ function New-PrtgSensorSystemUptime
 
     Process
     {
-        $validationParameters = @()
-        $validationParameters += "filter_parentid=$ParentId"
-        $validationParameters += 'filter_type=snmpuptime'
-
         $parameters = @{}
         $parameters.ParentId = $ParentId
         $parameters.SensorType = 'snmpuptime'
@@ -1811,7 +2226,6 @@ function New-PrtgSensorSystemUptime
         $parameters.RefreshInterval = $RefreshInterval
         $parameters.ErrorThreshold = $ErrorThreshold
         $parameters.ValidateDoesNotExist = $ValidateDoesNotExist
-        $parameters.ValidationParameters = $validationParameters
 
         New-PrtgSensor @parameters
     }
@@ -1859,10 +2273,6 @@ function New-PrtgSensor
         $ValidateDoesNotExist,
 
         [Parameter(ValueFromPipelineByPropertyName)]
-        [string[]]
-        $ValidationParameters,
-
-        [Parameter(ValueFromPipelineByPropertyName)]
         [string]
         $ValidateName,
 
@@ -1875,9 +2285,17 @@ function New-PrtgSensor
     {
         if ($ValidateDoesNotExist)
         {
-            $xml = ([xml](Get-PrtgTable -Content sensors -OtherParameters $ValidationParameters).Content).Sensors
+            $validationParameters += "filter_parentid=$ParentId"
+            $validationParameters += "filter_type=$SensorType"
+
+            if (-not $ValidateName)
+            {
+                $validationParameters += "filter_name=$Name"
+            }
             
-            if ($xml.TotalCount -gt 0 -and (-not $ValidateName -or ($ValidateName -and ($xml.Item | Where-Object Sensor -match $ValidateName))))
+            $xml = ([xml](Get-PrtgTable -Content sensors -OtherParameters $validationParameters).Content).Sensors
+            
+            if ($xml.TotalCount -gt 0 -and (-not $ValidateName -or ($ValidateName -and $xml.Item.Sensor -match $ValidateName)))
             {
                 Write-Verbose "Sensor already exists, skipping it"
                 return
@@ -1981,7 +2399,7 @@ function New-PrtgDevice
     [CmdletBinding()]
     param
     (
-        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         [Alias('Id')]
         [int]
         $ParentId,
@@ -2004,6 +2422,18 @@ function New-PrtgDevice
         $IPVersion = 'IPv4',
 
         [Parameter(ValueFromPipelineByPropertyName)]
+        [int]
+        $DatabasePort,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [PSCredential]
+        $DatabaseCredential,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [int]
+        $DatabaseTimeout = 60,
+
+        [Parameter(ValueFromPipelineByPropertyName)]
         [string[]]
         $Tags = @("PrtgFn_$Version")
     )
@@ -2023,13 +2453,31 @@ function New-PrtgDevice
             $parameters += "deviceicon_=$DeviceIcon"
         }
 
+        if ($DatabasePort -or $DatabaseAuthentication -or $DatabaseCredential -or $DatabaseTimeout -ne 60)
+        {
+            $parameters += "dbcredentials=0"   
+        }
+
+        if ($DatabaseCredential)
+        {
+            $parameters += "dbpassword_=$($DatabaseCredential.GetNetworkCredential().Password)"
+            $parameters += "dbuser_=$($DatabaseCredential.UserName)"
+            $parameters += "dbauth_=1"
+        }
+        else
+        {
+            $parameters += "dbpassword_="
+        }
+
+        $parameters += "dbport_=$DatabasePort"
+        $parameters += "dbtimeout_=$DatabaseTimeout"
+
         # Might add parameters for these later on ...
         # Without these, the resulting XML will differ slightly in the sense that passwords do not have the <encrypted /> tag.
         # I haven't tested to see if that tag is added later on if the user decides not to inherit settings from parent, 
         # but at least with snmpcommv1_ and snmpcommv2_ if they are not added here the password will default to "public" but will be in clear text, so best to have it here
         $parameters += "accessrights_=1"
         $parameters += "awssk_="
-        $parameters += "dbpassword_="
         $parameters += "elevationpass_="
         $parameters += "esxpassword_="
         $parameters += "linuxloginpassword_="
@@ -2057,7 +2505,7 @@ function Get-PrtgSensorValidValues
         $DeviceId,
 
         [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
-        [ValidateSet('SnmpMemory', 'SnmpTraffic', 'SnmpDiskFree', 'SnmpNetAppEnclosureStatus', 'SnmpNetAppLun', 'SnmpNetAppNetworkInterface', 'SnmpNetAppDiskFree', 'VmwareDatastoreExtern', 'PcIISAppPool', 'EsxServerHealthSensorExtern')]        
+        [ValidateSet('SnmpMemory', 'SnmpTraffic', 'SnmpDiskFree', 'SnmpNetAppEnclosureStatus', 'SnmpNetAppLun', 'SnmpNetAppNetworkInterface', 'SnmpNetAppDiskFree', 'VmwareDatastoreExtern', 'PcIISAppPool', 'EsxServerHealthSensorExtern', 'EsxServerSensorExtern')]        
         [string]
         $SensorType
     )
@@ -2133,11 +2581,24 @@ function Get-PrtgSensorValidValues
                 $index = 1
                 'datafieldlist__check'
             }
+            'EsxServerSensorExtern'
+            {
+                $index = 1
+                'datafieldlist__check'
+            }
         }
 
-        $regMatches = ([regex]::Matches($result.Content, "<[^<]+$elementName((?!\/?>).)*").Value | ForEach-Object {[xml] ($_ + "/>")}).Input.Value
+        $regMatches = ([regex]::Matches($result.Content, "<[^<]+$elementName((?!\/?>).)*").Value | Where-Object {-not [string]::IsNullOrEmpty($_)} | ForEach-Object {[xml] ($_ + "/>")}).Input.Value
 
-        $regMatches | ForEach-Object {[PSCustomObject] @{'ParentId' = $DeviceId; 'Name' = $_.Split('|')[$index]; $elementName = $_}}
+        $result = $regMatches | Where-Object {$_ -ne $null} | ForEach-Object {[PSCustomObject] @{'ParentId' = $DeviceId; 'Name' = $_.Split('|')[$index]; $elementName = $_}}
+
+        if (-not $result)
+        {
+            Write-Error "Unable to find any sensor values for Device $DeviceId for sensor type $SensorType"
+            return
+        }
+
+        $result
     }
 }
 
@@ -2417,7 +2878,7 @@ function Get-PrtgNewTriggerValues
     Process
     {
         $result = Invoke-PrtgCommand -CommandPath api/newtrigger.json -Parameters "parid=$Id", "class=$Class"
-        $properties = ($result.Content | ConvertFrom-Json).PSObject.Properties | Where Name -match '_' 
+        $properties = ($result.Content | ConvertFrom-Json).PSObject.Properties | Where-Object Name -match '_' 
         
         foreach ($property in $properties)
         {
@@ -2588,7 +3049,11 @@ function Invoke-PrtgCommand
         try
         {
             Write-Debug $urlString
+            $OldProgressPreference = $ProgressPreference
+            $ProgressPreference = 'SilentlyContinue'
+
             Invoke-WebRequest -Uri $urlString -MaximumRedirection $MaximumRedirection -UseBasicParsing:(-not $DoNotUseBasicParsing) -ErrorAction Stop -WebSession $Script:Session -Method $Method
+            $ProgressPreference = $OldProgressPreference
         }
         catch
         {
